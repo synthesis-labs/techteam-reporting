@@ -1,5 +1,8 @@
 project:
   output-dir: ../dist/dashboard
+  render:
+    - trends.md
+    - snapshot.md
 
 format:
   html:

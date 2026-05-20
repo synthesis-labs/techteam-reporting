@@ -1,9 +1,9 @@
 ---
-title: "AI Adoption Dashboard"
+title: "AI Adoption Snapshot"
 subtitle: "Snapshot: 2026-05-01"
 ---
 
-<p class="doc-meta"><strong>Synthesis Software Technologies</strong>  ·  Technology Office  ·  Snapshot 2026-05-01  ·  192 employees</p>
+<p class="doc-meta"><strong>Synthesis Software Technologies</strong>  ·  Technology Office  ·  Snapshot 2026-05-01  ·  192 employees  ·  <a href="dashboard.html">long-term trends →</a></p>
 
 <div class="kpi-grid">
 <div class="kpi"><div class="kpi-value">50%</div><div class="kpi-label">License adoption</div><div class="kpi-sub">96 of 192 employees</div></div>

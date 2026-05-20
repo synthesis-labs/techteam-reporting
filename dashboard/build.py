@@ -129,13 +129,14 @@ def build(month: str, root: Path) -> str:
 
     md: list[str] = []
     md.append("---")
-    md.append('title: "AI Adoption Dashboard"')
+    md.append('title: "AI Adoption Snapshot"')
     md.append(f'subtitle: "Snapshot: {snapshot_label}"')
     md.append("---")
     md.append("")
     md.append(
         f'<p class="doc-meta"><strong>Synthesis Software Technologies</strong>  ·  Technology Office  ·  '
-        f'Snapshot {snapshot_label}  ·  {total_employees} employees</p>'
+        f'Snapshot {snapshot_label}  ·  {total_employees} employees  ·  '
+        f'<a href="dashboard.html">long-term trends →</a></p>'
     )
     md.append("")
 
@@ -270,8 +271,8 @@ def main() -> None:
     )
     parser.add_argument(
         "--out",
-        default=str(Path(__file__).parent / "dashboard.md"),
-        help="output dashboard.md path",
+        default=str(Path(__file__).parent / "snapshot.md"),
+        help="output snapshot.md path",
     )
     args = parser.parse_args()
 

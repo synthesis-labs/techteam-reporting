@@ -8,9 +8,14 @@ on:
       - "dashboard/**"
       - ".github/workflows/build-dashboard.yml"
   workflow_dispatch:
+  repository_dispatch:
+    types: [data-updated]
 
 permissions:
   contents: write
+
+env:
+  DATA_REPO: synthesis-labs/techteam-reporting-data
 
 jobs:
   build:
@@ -19,12 +24,33 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Fetch private data repo
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ env.DATA_REPO }}
+          ssh-key: ${{ secrets.DATA_REPO_KEY }}
+          path: _data_private
+
+      - name: Stage data into data/
+        run: |
+          # Private repo layout mirrors what data/ would contain:
+          #   <YYYY-MM>/raw/, <YYYY-MM>/standardised/, aliases.csv
+          shopt -s nullglob
+          for d in _data_private/[0-9][0-9][0-9][0-9]-[0-9][0-9]; do
+            cp -R "$d" data/
+          done
+          if [ -f _data_private/aliases.csv ]; then
+            cp _data_private/aliases.csv data/aliases.csv
+          fi
+          echo "Staged months:"
+          ls -1 data | grep -E '^[0-9]{4}-[0-9]{2}$' || true
+
       - name: Detect latest snapshot
         id: snapshot
         run: |
           month=$(ls -1 data | grep -E '^[0-9]{4}-[0-9]{2}$' | sort | tail -n 1)
           if [ -z "$month" ]; then
-            echo "No YYYY-MM snapshot found under data/" >&2
+            echo "No YYYY-MM snapshot found under data/ (private repo empty?)" >&2
             exit 1
           fi
           echo "month=$month" >> "$GITHUB_OUTPUT"
@@ -35,15 +61,24 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: Regenerate dashboard.md
+      - name: Install Python dependencies
+        run: pip install plotly
+
+      - name: Aggregate history
+        run: python data/aggregate.py
+
+      - name: Regenerate snapshot.md
         run: python dashboard/build.py --month "${{ steps.snapshot.outputs.month }}"
+
+      - name: Regenerate trends.md
+        run: python dashboard/build_trends.py
 
       - name: Set up Quarto
         uses: quarto-dev/quarto-actions/setup@v2
 
       - name: Render dashboard
         working-directory: dashboard
-        run: quarto render dashboard.md
+        run: quarto render
 
       - name: Publish to gh-pages
         uses: peaceiris/actions-gh-pages@v4
