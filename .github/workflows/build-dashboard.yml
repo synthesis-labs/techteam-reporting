@@ -1,0 +1,54 @@
+name: Build dashboard
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "data/**"
+      - "dashboard/**"
+      - ".github/workflows/build-dashboard.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Detect latest snapshot
+        id: snapshot
+        run: |
+          month=$(ls -1 data | grep -E '^[0-9]{4}-[0-9]{2}$' | sort | tail -n 1)
+          if [ -z "$month" ]; then
+            echo "No YYYY-MM snapshot found under data/" >&2
+            exit 1
+          fi
+          echo "month=$month" >> "$GITHUB_OUTPUT"
+          echo "Building dashboard for snapshot: $month"
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Regenerate dashboard.md
+        run: python dashboard/build.py --month "${{ steps.snapshot.outputs.month }}"
+
+      - name: Set up Quarto
+        uses: quarto-dev/quarto-actions/setup@v2
+
+      - name: Render dashboard
+        working-directory: dashboard
+        run: quarto render dashboard.md
+
+      - name: Publish to gh-pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./dist/dashboard
+          destination_dir: dashboard
+          keep_files: true
