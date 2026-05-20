@@ -1,0 +1,10 @@
+project:
+  output-dir: ../dist/dashboard
+
+format:
+  html:
+    theme: default
+    css: style.css
+    toc: false
+    embed-resources: true
+    page-layout: full
