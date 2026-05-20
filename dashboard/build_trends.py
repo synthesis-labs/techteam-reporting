@@ -374,7 +374,7 @@ def build(history_dir: Path) -> str:
 
     md: list[str] = []
     md.append("---")
-    md.append('title: "AI Adoption Trends"')
+    md.append('title: "AI Adoption and Maturity Trends"')
     md.append(f'subtitle: "{months[0]} → {months[-1]}  ·  {n_months} snapshot{"s" if n_months != 1 else ""}"')
     md.append("output-file: index")
     md.append("---")
@@ -425,7 +425,7 @@ def build(history_dir: Path) -> str:
 
     md.append("## Adoption over time")
     md.append("")
-    if n_months >= 2:
+    if kpis:
         md.append(render(fig_adoption_over_time(kpis), "chart-adoption"))
     else:
         md.append(single_month_note)
@@ -433,7 +433,7 @@ def build(history_dir: Path) -> str:
 
     md.append("## License adoption by tool")
     md.append("")
-    if n_months >= 2:
+    if tool_rows:
         md.append(render(fig_tool_adoption(tool_rows), "chart-tools"))
     else:
         md.append(single_month_note)

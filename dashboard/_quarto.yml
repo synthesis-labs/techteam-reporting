@@ -7,7 +7,7 @@ project:
     - snapshot-2026-05.md
 
 website:
-  title: "AI Adoption Dashboard"
+  title: "AI Adoption and Maturity Dashboard"
   sidebar:
     style: docked
     border: true

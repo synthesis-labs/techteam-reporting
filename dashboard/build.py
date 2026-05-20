@@ -442,7 +442,7 @@ def write_quarto_yml(months_newest_first: list[str], out: Path) -> None:
     lines += [
         "",
         "website:",
-        '  title: "AI Adoption Dashboard"',
+        '  title: "AI Adoption and Maturity Dashboard"',
         "  sidebar:",
         "    style: docked",
         "    border: true",
