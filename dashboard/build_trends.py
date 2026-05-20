@@ -183,6 +183,82 @@ def fig_dept_heatmap(dept_rows: list[dict]) -> go.Figure:
     return fig
 
 
+TIER_ORDER = ["L3", "L2", "L1", "L0", "TBD"]
+TIER_COLOR = {
+    "L3": "#16a34a",
+    "L2": "#65a30d",
+    "L1": "#eab308",
+    "L0": "#94a3b8",
+    "TBD": "#cbd5e1",
+}
+
+
+def fig_tier_mix(tier_rows: list[dict]) -> go.Figure:
+    """Stacked bar: project count per tier per month."""
+    months = sorted({r["month"] for r in tier_rows})
+    by_tier: dict[str, dict[str, int]] = defaultdict(dict)
+    labels: dict[str, str] = {}
+    for r in tier_rows:
+        by_tier[r["tier"]][r["month"]] = int(r["project_count"])
+        labels[r["tier"]] = r.get("tier_label", r["tier"])
+
+    fig = go.Figure(layout=BASE_LAYOUT)
+    for tier in TIER_ORDER:
+        if tier not in by_tier:
+            continue
+        fig.add_trace(go.Bar(
+            x=months,
+            y=[by_tier[tier].get(m, 0) for m in months],
+            name=labels.get(tier, tier),
+            marker_color=TIER_COLOR[tier],
+            hovertemplate=f"{labels.get(tier, tier)}<br>%{{x}}: %{{y}} projects<extra></extra>",
+        ))
+    fig.update_layout(
+        barmode="stack",
+        yaxis_title="projects",
+        legend=dict(orientation="h", y=-0.25, x=0),
+        height=380,
+    )
+    return fig
+
+
+def fig_ratings_by_tier(ratings_rows: list[dict]) -> go.Figure:
+    """Line chart: mean overall rating per tier over time."""
+    months = sorted({r["month"] for r in ratings_rows})
+    by_tier: dict[str, list[tuple[str, float | None]]] = defaultdict(list)
+    labels: dict[str, str] = {}
+    for r in ratings_rows:
+        try:
+            v = float(r["mean_overall_rating"])
+        except (TypeError, ValueError):
+            v = None
+        by_tier[r["tier"]].append((r["month"], v))
+        labels[r["tier"]] = r.get("tier_label", r["tier"])
+
+    fig = go.Figure(layout=BASE_LAYOUT)
+    for tier in TIER_ORDER:
+        series = sorted(by_tier.get(tier, []), key=lambda x: x[0])
+        if not series or all(v is None for _, v in series):
+            continue
+        fig.add_trace(go.Scatter(
+            x=[m for m, _ in series],
+            y=[v for _, v in series],
+            mode="lines+markers",
+            name=labels.get(tier, tier),
+            line=dict(color=TIER_COLOR[tier], width=2.5),
+            marker=dict(size=8),
+            hovertemplate=f"{labels.get(tier, tier)}<br>%{{x}}: %{{y:.2f}}<extra></extra>",
+            connectgaps=True,
+        ))
+    fig.update_layout(
+        yaxis_title="mean overall rating",
+        yaxis_range=[0, 5],
+        legend=dict(orientation="h", y=-0.2, x=0),
+        height=380,
+    )
+    return fig
+
+
 def fig_tag_mix(tag_rows: list[dict]) -> go.Figure:
     months = sorted({r["month"] for r in tag_rows})
     tags = sorted({r["ai_usage_tag"] for r in tag_rows})
@@ -282,8 +358,11 @@ def build(history_dir: Path) -> str:
     tool_rows = read(history_dir / "tool_adoption_by_month.csv")
     dept_rows = read(history_dir / "dept_adoption_by_month.csv")
     tag_rows = read(history_dir / "tag_usage_by_month.csv")
+    tier_rows = read(history_dir / "tier_by_month.csv")
+    ratings_rows = read(history_dir / "ratings_by_tier_by_month.csv")
     churn_rows = read(history_dir / "license_churn.csv")
     assessment_rows = read(history_dir / "assessments_by_month.csv")
+    assessment_dept_rows = read(history_dir / "assessments_by_dept_by_month.csv")
 
     if not kpis:
         raise SystemExit(f"No history found at {history_dir}. Run data/aggregate.py first.")
@@ -297,7 +376,7 @@ def build(history_dir: Path) -> str:
     md.append("---")
     md.append('title: "AI Adoption Trends"')
     md.append(f'subtitle: "{months[0]} → {months[-1]}  ·  {n_months} snapshot{"s" if n_months != 1 else ""}"')
-    md.append("output-file: dashboard")
+    md.append("output-file: index")
     md.append("---")
     md.append("")
     md.append(PLOTLY_CDN)
@@ -305,7 +384,7 @@ def build(history_dir: Path) -> str:
     md.append(
         f'<p class="doc-meta"><strong>Synthesis Software Technologies</strong>  ·  Technology Office  ·  '
         f'Long-term view  ·  latest: {curr["snapshot_date"]}  ·  '
-        f'<a href="snapshot.html">current-month snapshot →</a></p>'
+        f'<a href="snapshot-{months[-1]}.html">latest snapshot →</a></p>'
     )
     md.append("")
 
@@ -369,12 +448,33 @@ def build(history_dir: Path) -> str:
     md.append(render(fig_dept_heatmap(dept_rows), "chart-dept"))
     md.append("")
 
-    md.append("## Project AI usage")
+    md.append("## Project AI maturity by tier")
     md.append("")
     md.append(
-        '<p>Stacked tag counts from the PS Project Tracker\'s <code>AI Usage</code> field. '
-        'Greens are productive tags (Research, Dev, CI/CD, Complete Feature); greys are '
-        '<code>No AI Usage</code> / <code>To be determined</code>.</p>'
+        '<p>Each project is assigned to its highest qualifying tier each month. '
+        '<strong>L3</strong> is CI/CD-embedded or full-feature AI; <strong>L2</strong> '
+        'is AI for development; <strong>L1</strong> is research-only; <strong>L0</strong> '
+        'is no AI; <strong>TBD</strong> are projects pending classification.</p>'
+    )
+    md.append(render(fig_tier_mix(tier_rows), "chart-tiers"))
+    md.append("")
+
+    if any(int(r.get("projects_scored", 0) or 0) for r in ratings_rows):
+        md.append("## Project performance by AI tier")
+        md.append("")
+        md.append(
+            '<p>Mean <em>overall_rating</em> per AI tier, over time. Climbing lines '
+            'on L2/L3 vs flat L0 lines support the "AI is helping delivery" story; '
+            'divergence the other way is worth investigating.</p>'
+        )
+        md.append(render(fig_ratings_by_tier(ratings_rows), "chart-ratings"))
+        md.append("")
+
+    md.append("## Project AI tag mix (detail)")
+    md.append("")
+    md.append(
+        '<p>Tag-level breakdown beneath the tier rollup. A project can carry multiple '
+        'tags; counts here are tags, not projects.</p>'
     )
     md.append(render(fig_tag_mix(tag_rows), "chart-tags"))
     md.append("")
@@ -396,15 +496,40 @@ def build(history_dir: Path) -> str:
     md.append("")
     if assessment_rows:
         md.append(
-            '<p>Distribution of self-reported AI maturity levels across responses '
-            'each month (as % of respondents).</p>'
+            '<p>Distribution of self-reported AI maturity levels (L0–L4) across '
+            'respondents each month, as % of total responses.</p>'
         )
         md.append(render(fig_assessments(assessment_rows), "chart-assessments"))
+        md.append("")
+        if assessment_dept_rows:
+            latest_month = max(r["month"] for r in assessment_dept_rows)
+            latest = [r for r in assessment_dept_rows if r["month"] == latest_month]
+            md.append(f"### Latest snapshot ({latest_month}) — by department")
+            md.append("")
+            md.append('<table class="adoption-table">')
+            md.append(
+                "<thead><tr><th>Department</th><th>Responses</th>"
+                "<th>Avg level</th><th>Developers</th>"
+                "<th>L0</th><th>L1</th><th>L2</th><th>L3</th><th>L4</th></tr></thead>"
+            )
+            md.append("<tbody>")
+            for r in sorted(latest, key=lambda r: -int(r.get("responses", 0))):
+                md.append(
+                    f'<tr><td>{r["department"]}</td>'
+                    f'<td>{r["responses"]}</td>'
+                    f'<td>{r.get("avg_level", "—")}</td>'
+                    f'<td>{r["developers"]}/{int(r["developers"])+int(r["non_developers"])}</td>'
+                    f'<td>{r["level_0"]}</td><td>{r["level_1"]}</td>'
+                    f'<td>{r["level_2"]}</td><td>{r["level_3"]}</td>'
+                    f'<td>{r["level_4"]}</td></tr>'
+                )
+            md.append("</tbody></table>")
+            md.append("")
     else:
         md.append(
             '<p class="note">No assessment responses loaded yet. Drop '
-            '<code>assessments.xlsx</code> into <code>data/&lt;YYYY-MM&gt;/raw/</code> '
-            'and re-run <code>data/load.py</code> + <code>data/aggregate.py</code>.</p>'
+            '<code>assessments.xlsx</code> into the private repo\'s '
+            '<code>&lt;YYYY-MM&gt;/raw/</code> and re-run the loader.</p>'
         )
     md.append("")
 

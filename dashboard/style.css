@@ -207,6 +207,19 @@ p code, code {
 .bar-row.tag-productive .bar-fill { background: #16a34a; }
 .bar-row.tag-other      .bar-fill { background: #94a3b8; }
 
+/* AI tier bar colors (L3 = best, L0 = none, TBD = unknown) */
+.bar-row.tier-l3  .bar-fill { background: #16a34a; }
+.bar-row.tier-l2  .bar-fill { background: #65a30d; }
+.bar-row.tier-l1  .bar-fill { background: #eab308; }
+.bar-row.tier-l0  .bar-fill { background: #94a3b8; }
+.bar-row.tier-tbd .bar-fill { background: #cbd5e1; }
+
+/* Tool delta indicators (▲ / ▼ vs prior month) */
+.delta-up   { color: #16a34a; font-weight: 700; }
+.delta-down { color: #dc2626; font-weight: 700; }
+.delta-flat { color: #6b7280; font-weight: 600; }
+.delta-none { color: #cbd5e1; }
+
 /* --- Adoption tables --- */
 
 table.adoption-table {

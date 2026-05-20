@@ -1,6 +1,6 @@
-month,tool,seats,pct_of_employees
-2026-05,claude,86,44.79
-2026-05,cursor,19,9.9
-2026-05,chatgpt,0,0.0
-2026-05,copilot,0,0.0
-2026-05,gemini,0,0.0
+month,tool,seats,pct_of_employees,prev_seats,delta_vs_prior
+2026-05,claude,86,44.79,,
+2026-05,cursor,19,9.9,,
+2026-05,chatgpt,0,0.0,,
+2026-05,copilot,0,0.0,,
+2026-05,gemini,0,0.0,,

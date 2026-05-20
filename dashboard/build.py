@@ -1,19 +1,39 @@
 """
-Generate dashboard.md from the standardised CSVs for a given month snapshot.
+Generate one snapshot-<YYYY-MM>.md per month under data/, and the
+_quarto.yml that wires them into a Quarto website with a sidebar.
 
 Usage:
-    python build.py --month 2026-05
+    python build.py                    # all months
+    python build.py --month 2026-05    # just one (for testing)
 """
 
 from __future__ import annotations
 
 import argparse
 import csv
+import re
 from collections import Counter, defaultdict
 from pathlib import Path
 
 
 TOOLS = ["claude", "cursor", "chatgpt", "copilot", "gemini"]
+MONTH_RE = re.compile(r"^\d{4}-\d{2}$")
+
+TIER_ORDER = ["L3", "L2", "L1", "L0", "TBD"]
+TIER_KLASS = {  # CSS hooks for tier-coloured bars
+    "L3": "tier-l3",
+    "L2": "tier-l2",
+    "L1": "tier-l1",
+    "L0": "tier-l0",
+    "TBD": "tier-tbd",
+}
+TOOL_DISPLAY = {
+    "claude": "Claude",
+    "cursor": "Cursor",
+    "chatgpt": "ChatGPT",
+    "copilot": "GitHub Copilot",
+    "gemini": "Gemini",
+}
 PRODUCTIVE_AI_TAGS = {
     "Research Mode",
     "AI for Development",
@@ -50,13 +70,27 @@ def bar(pct: float, label: str, count: int, total: int, klass: str = "") -> str:
     )
 
 
-def build(month: str, root: Path) -> str:
+def _filter_history(rows: list[dict], month: str) -> list[dict]:
+    return [r for r in rows if r.get("month") == month]
+
+
+def build(month: str, root: Path, history_dir: Path | None = None) -> str:
     std = root / month / "standardised"
     employees = read(std / "employees.csv")
     allocations = read(std / "license_allocations.csv")
     unmatched = read(std / "unmatched.csv")
     projects = read(std / "projects.csv")
     ai_usage = read(std / "project_ai_usage.csv")
+    assessments = read(std / "assessments.csv")
+
+    # Cross-cutting history (deltas, tier rollups, ratings-by-tier).
+    # These are produced by data/aggregate.py.
+    hist = history_dir if history_dir is not None else root / "history"
+    tool_history = _filter_history(read(hist / "tool_adoption_by_month.csv"), month)
+    tier_history = _filter_history(read(hist / "tier_by_month.csv"), month)
+    ratings_history = _filter_history(read(hist / "ratings_by_tier_by_month.csv"), month)
+    assessments_by_month = _filter_history(read(hist / "assessments_by_month.csv"), month)
+    assessments_by_dept = _filter_history(read(hist / "assessments_by_dept_by_month.csv"), month)
 
     total_employees = len(employees)
 
@@ -129,14 +163,15 @@ def build(month: str, root: Path) -> str:
 
     md: list[str] = []
     md.append("---")
-    md.append('title: "AI Adoption Snapshot"')
-    md.append(f'subtitle: "Snapshot: {snapshot_label}"')
+    md.append(f'title: "Snapshot — {month}"')
+    md.append(f'subtitle: "{snapshot_label}  ·  {total_employees} employees"')
+    md.append(f"output-file: snapshot-{month}")
     md.append("---")
     md.append("")
     md.append(
         f'<p class="doc-meta"><strong>Synthesis Software Technologies</strong>  ·  Technology Office  ·  '
-        f'Snapshot {snapshot_label}  ·  {total_employees} employees  ·  '
-        f'<a href="dashboard.html">long-term trends →</a></p>'
+        f'Snapshot {snapshot_label}  ·  '
+        f'<a href="index.html">long-term trends →</a></p>'
     )
     md.append("")
 
@@ -165,18 +200,43 @@ def build(month: str, root: Path) -> str:
     md.append("</div>")
     md.append("")
 
-    # License allocation by tool
+    # License allocation by tool (now with month-over-month delta)
     md.append("## License allocation by tool")
     md.append("")
-    md.append('<div class="bar-block">')
+    delta_by_tool = {r["tool"]: r for r in tool_history}
+    md.append('<table class="adoption-table">')
+    md.append(
+        "<thead><tr><th>Tool</th><th>Licensed</th><th>% workforce</th>"
+        "<th>Prior month</th><th>Δ</th></tr></thead>"
+    )
+    md.append("<tbody>")
     for tool, n, pct in tool_rows:
-        klass = f"tool-{tool}"
-        md.append(bar(pct, tool.title() if tool != "chatgpt" else "ChatGPT", n, total_employees, klass))
-    md.append("</div>")
+        h = delta_by_tool.get(tool, {})
+        prev = h.get("prev_seats", "")
+        delta_raw = h.get("delta_vs_prior", "")
+        if delta_raw == "" or delta_raw is None:
+            delta_html = '<span class="delta-none">—</span>'
+        else:
+            try:
+                d = int(delta_raw)
+                if d > 0:
+                    delta_html = f'<span class="delta-up">▲ {d}</span>'
+                elif d < 0:
+                    delta_html = f'<span class="delta-down">▼ {abs(d)}</span>'
+                else:
+                    delta_html = '<span class="delta-flat">±0</span>'
+            except (TypeError, ValueError):
+                delta_html = '<span class="delta-none">—</span>'
+        md.append(
+            f'<tr><td>{TOOL_DISPLAY[tool]}</td><td>{n}</td>'
+            f'<td>{pct:.1f}%</td><td>{prev or "—"}</td><td>{delta_html}</td></tr>'
+        )
+    md.append("</tbody></table>")
     md.append("")
     md.append(
         f'<p class="note">Counts reflect resolved licenses only — {len(unmatched)} '
-        f"unmatched rows are excluded (see Data quality below).</p>"
+        f"unmatched rows are excluded (see Data quality below). Δ compares to the prior "
+        f"snapshot loaded into <code>data/history/</code>.</p>"
     )
     md.append("")
 
@@ -195,25 +255,67 @@ def build(month: str, root: Path) -> str:
     md.append("</tbody></table>")
     md.append("")
 
-    # Project AI usage
-    md.append("## Project AI usage")
+    # Project AI tier (L0-L3) — each project assigned its highest qualifying tier
+    md.append("## Project AI maturity by tier")
     md.append("")
     md.append(
-        f'<p>Across <strong>{total_projects} projects</strong>, the '
-        f"<code>AI Usage</code> field on the PS Project Tracker carries "
-        f"<strong>{sum(tag_counts.values())} tags</strong>. A project can carry "
-        f"multiple tags; counts below are tags, not projects.</p>"
+        f'<p>Each project is assigned to one tier — the highest it qualifies for '
+        f'based on its <code>AI Usage</code> tags. <strong>L3</strong> is '
+        f'CI/CD-embedded or full feature in AI; <strong>L2</strong> is AI for '
+        f'development; <strong>L1</strong> is research-only; <strong>L0</strong> '
+        f'is no AI; <strong>TBD</strong> are projects pending classification.</p>'
     )
     md.append("")
+    tier_by = {r["tier"]: r for r in tier_history}
+    tier_total = sum(int(tier_by.get(t, {}).get("project_count", 0)) for t in TIER_ORDER)
     md.append('<div class="bar-block">')
-    sorted_tags = sorted(tag_counts.items(), key=lambda kv: -kv[1])
-    total_tags = sum(tag_counts.values())
-    for tag, count in sorted_tags:
-        pct = (count / total_tags * 100) if total_tags else 0
-        klass = "tag-productive" if tag in PRODUCTIVE_AI_TAGS else "tag-other"
-        md.append(bar(pct, tag, count, total_tags, klass))
+    for tier in TIER_ORDER:
+        h = tier_by.get(tier, {})
+        count = int(h.get("project_count", 0))
+        label = h.get("tier_label", tier)
+        pct = (count / tier_total * 100) if tier_total else 0
+        md.append(bar(pct, label, count, tier_total, TIER_KLASS[tier]))
     md.append("</div>")
     md.append("")
+
+    # Project ratings by tier — supports the "is AI helping?" conversation
+    if any(int(r.get("projects_scored", 0)) for r in ratings_history):
+        md.append("## Project performance by AI tier")
+        md.append("")
+        md.append(
+            '<p>Mean project ratings within each tier. Useful for the "are AI-heavy '
+            'projects delivering better?" question. Means are over projects with a '
+            'numeric rating in that field; blank cells mean no scored projects.</p>'
+        )
+        md.append("")
+        md.append('<table class="adoption-table">')
+        md.append(
+            "<thead><tr><th>Tier</th><th>Projects</th>"
+            "<th>Overall</th><th>Budget</th><th>Delivery</th>"
+            "<th>Team</th><th>CSAT</th></tr></thead>"
+        )
+        md.append("<tbody>")
+        ratings_by = {r["tier"]: r for r in ratings_history}
+        for tier in TIER_ORDER:
+            r = ratings_by.get(tier, {})
+            n = r.get("projects_scored", 0)
+            if not int(n or 0):
+                continue
+            cells = [
+                r.get("mean_overall_rating", ""),
+                r.get("mean_budget_score", ""),
+                r.get("mean_delivery_score", ""),
+                r.get("mean_team_score", ""),
+                r.get("mean_csat_score", ""),
+            ]
+            cells = [f"{float(c):.2f}" if c not in ("", None) else "—" for c in cells]
+            md.append(
+                f'<tr><td>{r.get("tier_label", tier)}</td><td>{n}</td>'
+                + "".join(f"<td>{c}</td>" for c in cells)
+                + "</tr>"
+            )
+        md.append("</tbody></table>")
+        md.append("")
 
     # BU breakdown
     md.append("## AI-using projects by BU")
@@ -229,6 +331,61 @@ def build(month: str, root: Path) -> str:
         )
     md.append("</tbody></table>")
     md.append("")
+
+    # Self-Assessment — AI Maturity (L0-L4)
+    md.append("## Self-assessed AI maturity")
+    md.append("")
+    if assessments:
+        total_resp = len(assessments)
+        level_dist = sorted(
+            ((r["self_level"], int(r["count"]), float(r["share"])) for r in assessments_by_month),
+            key=lambda x: x[0],
+        )
+        md.append(
+            f'<p><strong>{total_resp} responses</strong> from the AI Maturity '
+            f'Self-Assessment. Bars show the share of respondents at each '
+            f'self-assigned maturity level (L0 = no AI familiarity, '
+            f'L4 = embeds AI in their workflow).</p>'
+        )
+        md.append("")
+        md.append('<div class="bar-block">')
+        for level, count, share in level_dist:
+            md.append(bar(share, level, count, total_resp, "tier-l2"))
+        md.append("</div>")
+        md.append("")
+
+        # Per-department breakdown
+        if assessments_by_dept:
+            md.append('<table class="adoption-table">')
+            md.append(
+                "<thead><tr><th>Department</th><th>Responses</th>"
+                "<th>Avg level</th><th>Developers</th>"
+                "<th>L0</th><th>L1</th><th>L2</th><th>L3</th><th>L4</th></tr></thead>"
+            )
+            md.append("<tbody>")
+            sorted_dept = sorted(
+                assessments_by_dept, key=lambda r: -int(r.get("responses", 0))
+            )
+            for r in sorted_dept:
+                md.append(
+                    f'<tr><td>{r["department"]}</td>'
+                    f'<td>{r["responses"]}</td>'
+                    f'<td>{r.get("avg_level", "—")}</td>'
+                    f'<td>{r["developers"]}/{int(r["developers"])+int(r["non_developers"])}</td>'
+                    f'<td>{r["level_0"]}</td><td>{r["level_1"]}</td>'
+                    f'<td>{r["level_2"]}</td><td>{r["level_3"]}</td>'
+                    f'<td>{r["level_4"]}</td></tr>'
+                )
+            md.append("</tbody></table>")
+            md.append("")
+    else:
+        md.append(
+            '<p class="note">No AI Maturity Self-Assessment responses loaded for '
+            'this snapshot yet. Drop <code>assessments.xlsx</code> into the private '
+            'repo\'s <code>&lt;YYYY-MM&gt;/raw/</code> and re-run the loader to '
+            'populate this section.</p>'
+        )
+        md.append("")
 
     # Data quality
     md.append("## Data quality")
@@ -246,7 +403,7 @@ def build(month: str, root: Path) -> str:
         f'<div class="dq-sub">ChatGPT, Copilot, Gemini — not yet loaded for this snapshot</div></div>'
     )
     md.append(
-        f'<div class="dq-card"><div class="dq-value">0</div>'
+        f'<div class="dq-card"><div class="dq-value">{len(assessments)}</div>'
         f'<div class="dq-label">Assessment responses</div>'
         f'<div class="dq-sub">AI Maturity Self Assessment — not yet loaded</div></div>'
     )
@@ -261,25 +418,96 @@ def build(month: str, root: Path) -> str:
     return "\n".join(md) + "\n"
 
 
+def discover_months(data_root: Path) -> list[str]:
+    return sorted(
+        d.name for d in data_root.iterdir()
+        if d.is_dir() and MONTH_RE.match(d.name)
+        and (d / "standardised").is_dir()
+    )
+
+
+def write_quarto_yml(months_newest_first: list[str], out: Path) -> None:
+    """Generate _quarto.yml with a website sidebar listing Trends + every snapshot."""
+    lines = [
+        "# Auto-generated by dashboard/build.py — do not edit by hand.",
+        "project:",
+        "  type: website",
+        "  output-dir: ../dist/dashboard",
+        "  render:",
+        "    - trends.md",
+    ]
+    for m in months_newest_first:
+        lines.append(f"    - snapshot-{m}.md")
+
+    lines += [
+        "",
+        "website:",
+        '  title: "AI Adoption Dashboard"',
+        "  sidebar:",
+        "    style: docked",
+        "    border: true",
+        "    search: false",
+        "    contents:",
+        '      - text: "Trends"',
+        "        href: index.html",
+        '      - section: "Snapshots"',
+        "        contents:",
+    ]
+    for m in months_newest_first:
+        lines.append(f'          - text: "{m}"')
+        lines.append(f"            href: snapshot-{m}.html")
+
+    lines += [
+        "",
+        "format:",
+        "  html:",
+        "    theme: default",
+        "    css: style.css",
+        "    toc: false",
+        "    page-layout: full",
+    ]
+    out.write_text("\n".join(lines) + "\n", encoding="utf-8")
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--month", required=True, help="snapshot folder, e.g. 2026-05")
+    parser.add_argument(
+        "--month",
+        help="build just this month (otherwise build all months found under data/)",
+    )
     parser.add_argument(
         "--data-root",
         default=str(Path(__file__).parent.parent / "data"),
         help="path to data/ folder",
     )
     parser.add_argument(
-        "--out",
-        default=str(Path(__file__).parent / "snapshot.md"),
-        help="output snapshot.md path",
+        "--dashboard-dir",
+        default=str(Path(__file__).parent),
+        help="output directory for snapshot-<month>.md and _quarto.yml",
     )
     args = parser.parse_args()
 
-    content = build(args.month, Path(args.data_root))
-    out_path = Path(args.out)
-    out_path.write_text(content, encoding="utf-8")
-    print(f"wrote {out_path}")
+    data_root = Path(args.data_root)
+    dashboard_dir = Path(args.dashboard_dir)
+
+    if args.month:
+        months = [args.month]
+    else:
+        months = discover_months(data_root)
+        if not months:
+            raise SystemExit(f"No YYYY-MM snapshots found under {data_root}")
+
+    for m in months:
+        content = build(m, data_root)
+        out_path = dashboard_dir / f"snapshot-{m}.md"
+        out_path.write_text(content, encoding="utf-8")
+        print(f"  wrote {out_path}")
+
+    # Regenerate _quarto.yml only when doing a full build. (A single-month
+    # build is for one-off testing and shouldn't change the sidebar.)
+    if not args.month:
+        write_quarto_yml(sorted(months, reverse=True), dashboard_dir / "_quarto.yml")
+        print(f"  wrote {dashboard_dir / '_quarto.yml'}")
 
 
 if __name__ == "__main__":

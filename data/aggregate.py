@@ -24,7 +24,64 @@ PRODUCTIVE_AI_TAGS = {
     "AI in CI/CD",
     "Complete Feature Built in AI",
 }
+
+# Map each AI Usage tag to a tier — mirrors the May 2026 internal report.
+# A project carrying multiple tags is assigned the highest tier it qualifies
+# for. L3 > L2 > L1 > L0 > TBD.
+TIER_OF_TAG = {
+    "AI in CI/CD": "L3",
+    "Complete Feature Built in AI": "L3",
+    "AI for Development": "L2",
+    "Research Mode": "L1",
+    "No AI Usage": "L0",
+    "To be determined": "TBD",
+}
+TIER_ORDER = ["L3", "L2", "L1", "L0", "TBD"]
+TIER_LABEL = {
+    "L3": "L3 — CI/CD & Full AI",
+    "L2": "L2 — AI for Development",
+    "L1": "L1 — Research",
+    "L0": "L0 — No AI",
+    "TBD": "TBD",
+}
+TIER_RANK = {"L3": 4, "L2": 3, "L1": 2, "L0": 1, "TBD": 0}
+
+# Project rating fields parsed as floats by load.py — used in ratings-by-tier.
+RATING_FIELDS = [
+    "overall_rating",
+    "budget_score",
+    "delivery_score",
+    "team_score",
+    "csat_score",
+    "scope_health_score",
+]
+
 MONTH_RE = re.compile(r"^\d{4}-\d{2}$")
+
+
+def project_tier(tags: set[str]) -> str:
+    """Highest tier a project qualifies for given its set of AI Usage tags."""
+    best = "TBD"
+    best_rank = TIER_RANK["TBD"]
+    for tag in tags:
+        tier = TIER_OF_TAG.get(tag, "TBD")
+        if TIER_RANK[tier] > best_rank:
+            best = tier
+            best_rank = TIER_RANK[tier]
+    return best
+
+
+def parse_float(v) -> float | None:
+    if v is None or v == "":
+        return None
+    try:
+        return float(v)
+    except (TypeError, ValueError):
+        return None
+
+
+def mean(values: list[float]) -> float | None:
+    return sum(values) / len(values) if values else None
 
 
 def read(path: Path) -> list[dict]:
@@ -109,6 +166,7 @@ def monthly_kpis(snapshots: list[dict]) -> list[dict]:
 
 def tool_adoption_by_month(snapshots: list[dict]) -> list[dict]:
     rows = []
+    prev_seats: dict[str, int] = {}
     for s in snapshots:
         total_emp = len(s["employees"])
         tool_counts = Counter(
@@ -116,12 +174,83 @@ def tool_adoption_by_month(snapshots: list[dict]) -> list[dict]:
         )
         for tool in TOOLS:
             seats = tool_counts.get(tool, 0)
+            prev = prev_seats.get(tool)
             rows.append({
                 "month": s["month"],
                 "tool": tool,
                 "seats": seats,
                 "pct_of_employees": round(seats / total_emp * 100, 2) if total_emp else 0,
+                "delta_vs_prior": "" if prev is None else seats - prev,
+                "prev_seats": "" if prev is None else prev,
             })
+            prev_seats[tool] = seats
+    return rows
+
+
+def tier_by_month(snapshots: list[dict]) -> list[dict]:
+    """One row per (month, tier). A project gets one tier (its highest)."""
+    rows = []
+    for s in snapshots:
+        project_tags: dict[str, set[str]] = defaultdict(set)
+        for r in s["ai_usage"]:
+            project_tags[r["project_name"]].add(r["ai_usage_tag"])
+
+        # Projects with no AI Usage rows at all → not represented in
+        # project_ai_usage.csv but exist in projects.csv. Surface them as TBD.
+        all_projects = {p["project_name"] for p in s["projects"]}
+        for p in all_projects:
+            project_tags.setdefault(p, set())
+
+        tier_counts: Counter = Counter(
+            project_tier(tags) for tags in project_tags.values()
+        )
+        total = sum(tier_counts.values())
+        for tier in TIER_ORDER:
+            count = tier_counts.get(tier, 0)
+            rows.append({
+                "month": s["month"],
+                "tier": tier,
+                "tier_label": TIER_LABEL[tier],
+                "project_count": count,
+                "share_of_projects": round(count / total * 100, 2) if total else 0,
+            })
+    return rows
+
+
+def ratings_by_tier_by_month(snapshots: list[dict]) -> list[dict]:
+    """Mean project ratings per AI tier per month. PII-safe — projects aggregated, not listed."""
+    rows = []
+    for s in snapshots:
+        project_tags: dict[str, set[str]] = defaultdict(set)
+        for r in s["ai_usage"]:
+            project_tags[r["project_name"]].add(r["ai_usage_tag"])
+
+        tier_of_project = {
+            p["project_name"]: project_tier(project_tags.get(p["project_name"], set()))
+            for p in s["projects"]
+        }
+
+        by_tier_field: dict[tuple[str, str], list[float]] = defaultdict(list)
+        tier_proj_count: Counter = Counter()
+        for p in s["projects"]:
+            tier = tier_of_project[p["project_name"]]
+            tier_proj_count[tier] += 1
+            for field in RATING_FIELDS:
+                v = parse_float(p.get(field))
+                if v is not None:
+                    by_tier_field[(tier, field)].append(v)
+
+        for tier in TIER_ORDER:
+            row = {
+                "month": s["month"],
+                "tier": tier,
+                "tier_label": TIER_LABEL[tier],
+                "projects_scored": tier_proj_count.get(tier, 0),
+            }
+            for field in RATING_FIELDS:
+                m = mean(by_tier_field.get((tier, field), []))
+                row[f"mean_{field}"] = "" if m is None else round(m, 2)
+            rows.append(row)
     return rows
 
 
@@ -242,6 +371,7 @@ def license_churn(snapshots: list[dict]) -> list[dict]:
 
 
 def assessments_by_month(snapshots: list[dict]) -> list[dict]:
+    """One row per (month, self_level) — overall L0-L4 distribution."""
     rows = []
     for s in snapshots:
         if not s["assessments"]:
@@ -257,6 +387,60 @@ def assessments_by_month(snapshots: list[dict]) -> list[dict]:
                 "count": count,
                 "share": round(count / total * 100, 2) if total else 0,
             })
+    return rows
+
+
+def _is_developer(job_title: str) -> bool:
+    """Heuristic: developer-track titles. Matches Engineer/Developer/Dev Lead."""
+    if not job_title:
+        return False
+    t = job_title.lower()
+    return any(k in t for k in ("engineer", "developer", "dev lead", "tech lead"))
+
+
+def assessments_by_dept_by_month(snapshots: list[dict]) -> list[dict]:
+    """One row per (month, department). Mean self-level + L0-L4 counts + dev/non-dev split."""
+    rows = []
+    for s in snapshots:
+        if not s["assessments"]:
+            continue
+        emp_by_code = {e["employee_code"]: e for e in s["employees"]}
+        dept_responses: dict[str, list[dict]] = defaultdict(list)
+        for r in s["assessments"]:
+            emp = emp_by_code.get(r.get("employee_code", ""))
+            dept = (emp.get("department") if emp else "") or "(no department)"
+            dept_responses[dept].append({**r, "_dept": dept, "_emp": emp})
+
+        for dept, resps in dept_responses.items():
+            level_counts: Counter = Counter()
+            level_sum = 0.0
+            level_n = 0
+            devs = 0
+            non_devs = 0
+            for r in resps:
+                lvl_raw = (r.get("self_level") or "").strip()
+                level_counts[lvl_raw or "(no response)"] += 1
+                # Try to parse numeric level (e.g. "Level 2" → 2, "2" → 2)
+                m = re.search(r"\d+", lvl_raw)
+                if m:
+                    level_sum += int(m.group(0))
+                    level_n += 1
+                if _is_developer((r.get("_emp") or {}).get("job_title", "")):
+                    devs += 1
+                else:
+                    non_devs += 1
+
+            row = {
+                "month": s["month"],
+                "department": dept,
+                "responses": len(resps),
+                "developers": devs,
+                "non_developers": non_devs,
+                "avg_level": round(level_sum / level_n, 2) if level_n else "",
+            }
+            for lvl in ("Level 0", "Level 1", "Level 2", "Level 3", "Level 4"):
+                row[lvl.replace(" ", "_").lower()] = level_counts.get(lvl, 0)
+            rows.append(row)
     return rows
 
 
@@ -293,6 +477,15 @@ def main() -> None:
         ]),
         "tool_adoption_by_month.csv": (tool_adoption_by_month(snapshots), [
             "month", "tool", "seats", "pct_of_employees",
+            "prev_seats", "delta_vs_prior",
+        ]),
+        "tier_by_month.csv": (tier_by_month(snapshots), [
+            "month", "tier", "tier_label", "project_count", "share_of_projects",
+        ]),
+        "ratings_by_tier_by_month.csv": (ratings_by_tier_by_month(snapshots), [
+            "month", "tier", "tier_label", "projects_scored",
+            "mean_overall_rating", "mean_budget_score", "mean_delivery_score",
+            "mean_team_score", "mean_csat_score", "mean_scope_health_score",
         ]),
         "dept_adoption_by_month.csv": (dept_adoption_by_month(snapshots), [
             "month", "department", "headcount", "with_license", "adoption_pct",
@@ -308,6 +501,10 @@ def main() -> None:
         ]),
         "assessments_by_month.csv": (assessments_by_month(snapshots), [
             "month", "self_level", "count", "share",
+        ]),
+        "assessments_by_dept_by_month.csv": (assessments_by_dept_by_month(snapshots), [
+            "month", "department", "responses", "developers", "non_developers",
+            "avg_level", "level_0", "level_1", "level_2", "level_3", "level_4",
         ]),
     }
 
