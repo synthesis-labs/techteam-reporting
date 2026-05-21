@@ -142,6 +142,222 @@ p code, code {
   color: #94a3b8;
 }
 
+/* Alert KPI — used for activation gaps (e.g. employees with no tools). */
+.kpi.kpi-alert {
+  background: linear-gradient(135deg, #7f1d1d 0%, #b91c1c 100%);
+}
+
+.kpi.kpi-alert .kpi-label {
+  color: #fecaca;
+}
+
+.kpi.kpi-alert .kpi-sub {
+  color: #fee2e2;
+}
+
+/* Secondary KPI strip — smaller cards beneath a section header. */
+.kpi-grid.kpi-grid-secondary {
+  margin: 0.5rem 0 1.25rem;
+}
+
+.kpi-grid.kpi-grid-secondary .kpi {
+  background: #1A1A2E;
+  padding: 1rem 1.1rem;
+}
+
+.kpi-grid.kpi-grid-secondary .kpi-value {
+  font-size: 1.75rem;
+}
+
+/* --- Insight callouts (auto-derived 🟢/🟡/🔴/🤖/📊/🎯) --- */
+
+.insight-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.65rem;
+  margin: 0.75rem 0 1.5rem;
+}
+
+.insight {
+  display: grid;
+  grid-template-columns: 32px 1fr;
+  align-items: start;
+  gap: 0.75rem;
+  padding: 0.85rem 1rem;
+  border-radius: 5px;
+  border-left: 4px solid #cbd5e1;
+  background: #f8fafc;
+}
+
+.insight-icon {
+  font-size: 1.25rem;
+  line-height: 1;
+  padding-top: 0.1rem;
+}
+
+.insight-headline {
+  font-weight: 700;
+  font-size: 0.92rem;
+  color: #1f2937;
+  margin-bottom: 0.2rem;
+}
+
+.insight-detail {
+  font-size: 0.82rem;
+  color: #475569;
+  line-height: 1.45;
+}
+
+.insight-green  { border-left-color: #16a34a; background: #f0fdf4; }
+.insight-amber  { border-left-color: #d97706; background: #fffbeb; }
+.insight-red    { border-left-color: #dc2626; background: #fef2f2; }
+.insight-blue   { border-left-color: #0F3460; background: #f0f4ff; }
+
+/* --- Alignment matrix (Aligned / Add Tools / Gap) --- */
+
+.align-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+  margin: 0.75rem 0 1.5rem;
+}
+
+.align-card {
+  padding: 1.15rem 1.25rem;
+  border-radius: 5px;
+  border-top: 4px solid #cbd5e1;
+  background: white;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+}
+
+.align-value {
+  font-size: 2rem;
+  font-weight: 800;
+  line-height: 1;
+  margin-bottom: 0.55rem;
+  color: #1A1A2E;
+  font-variant-numeric: tabular-nums;
+}
+
+.align-label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #374151;
+  margin-bottom: 0.4rem;
+}
+
+.align-sub {
+  font-size: 0.78rem;
+  color: #6b7280;
+  line-height: 1.45;
+}
+
+.align-good   { border-top-color: #16a34a; }
+.align-good   .align-value { color: #166534; }
+.align-warn   { border-top-color: #d97706; }
+.align-warn   .align-value { color: #92400e; }
+.align-danger { border-top-color: #dc2626; }
+.align-danger .align-value { color: #991b1b; }
+
+/* --- Strategic theme cards (Priority / Scale / Amplify) --- */
+
+.theme-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+  margin: 0.75rem 0 1.5rem;
+}
+
+.theme-card {
+  padding: 1.1rem 1.25rem 1.25rem;
+  border-radius: 5px;
+  background: white;
+  border-top: 5px solid #cbd5e1;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.07);
+  display: flex;
+  flex-direction: column;
+}
+
+.theme-header {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  margin-bottom: 0.7rem;
+}
+
+.theme-icon {
+  font-size: 1.05rem;
+  line-height: 1;
+}
+
+.theme-badge {
+  font-size: 0.62rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  padding: 0.18rem 0.55rem;
+  border-radius: 3px;
+  background: #f1f5f9;
+  color: #475569;
+}
+
+.theme-title {
+  font-size: 1.02rem;
+  font-weight: 700;
+  color: #1A1A2E;
+  margin-bottom: 0.8rem;
+}
+
+.theme-body, .theme-actions {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 0.85rem;
+  font-size: 0.84rem;
+  color: #374151;
+  line-height: 1.55;
+}
+
+.theme-body li {
+  padding: 0.1rem 0;
+}
+
+.theme-actions li {
+  position: relative;
+  padding: 0.15rem 0 0.15rem 1rem;
+}
+
+.theme-actions li::before {
+  content: "→";
+  position: absolute;
+  left: 0;
+  color: #94a3b8;
+  font-weight: 700;
+}
+
+.theme-actions li code {
+  font-size: 0.78rem;
+}
+
+.theme-divider {
+  font-size: 0.62rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: #94a3b8;
+  border-top: 1px solid #e5e7eb;
+  padding-top: 0.6rem;
+  margin-bottom: 0.4rem;
+}
+
+.theme-red    { border-top-color: #dc2626; }
+.theme-red    .theme-badge { background: #fee2e2; color: #991b1b; }
+.theme-amber  { border-top-color: #d97706; }
+.theme-amber  .theme-badge { background: #fef3c7; color: #92400e; }
+.theme-green  { border-top-color: #16a34a; }
+.theme-green  .theme-badge { background: #dcfce7; color: #166534; }
+
 /* --- Bar block (horizontal bars) --- */
 
 .bar-block {
@@ -335,8 +551,11 @@ p.footer {
 /* --- Responsive --- */
 
 @media (max-width: 900px) {
-  .kpi-grid { grid-template-columns: repeat(2, 1fr); }
-  .dq-grid  { grid-template-columns: 1fr; }
-  .bar-row  { grid-template-columns: 130px 1fr 100px; gap: 0.6rem; }
+  .kpi-grid    { grid-template-columns: repeat(2, 1fr); }
+  .dq-grid     { grid-template-columns: 1fr; }
+  .insight-grid { grid-template-columns: 1fr; }
+  .align-grid  { grid-template-columns: 1fr; }
+  .theme-grid  { grid-template-columns: 1fr; }
+  .bar-row     { grid-template-columns: 130px 1fr 100px; gap: 0.6rem; }
   main.content { padding: 2rem 1.5rem; }
 }
