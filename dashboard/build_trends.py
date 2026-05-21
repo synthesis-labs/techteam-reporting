@@ -57,12 +57,19 @@ def read(path: Path) -> list[dict]:
 
 
 def render(fig: go.Figure, div_id: str) -> str:
-    return fig.to_html(
+    # Plotly's to_html emits a single line of HTML with deep leading whitespace
+    # ("<div>" then ~28 spaces then nested content). Pandoc's markdown parser
+    # treats the indented content as an indented code block and wraps the whole
+    # chart in <pre><code>, escaping it instead of rendering. Wrapping the
+    # output in a Quarto raw-HTML block (```{=html}) bypasses markdown parsing
+    # for this region.
+    raw = fig.to_html(
         include_plotlyjs=False,
         full_html=False,
         div_id=div_id,
         config={"displayModeBar": False, "responsive": True},
     )
+    return "```{=html}\n" + raw + "\n```"
 
 
 def latest_kpis(kpis: list[dict]) -> dict:
@@ -111,11 +118,59 @@ def fig_adoption_over_time(kpis: list[dict]) -> go.Figure:
         marker=dict(size=8),
         hovertemplate="%{x}<br>%{y:.1f}%<extra></extra>",
     ))
+    # No-tools % — the inverse signal that the ExCo report leads with.
+    no_tools_y = [float(k.get("no_tools_pct") or 0) for k in kpis]
+    if any(no_tools_y):
+        fig.add_trace(go.Scatter(
+            x=[k["month"] for k in kpis],
+            y=no_tools_y,
+            mode="lines+markers",
+            name="Employees with no tools",
+            line=dict(color="#dc2626", width=2.5, dash="dash"),
+            marker=dict(size=7),
+            hovertemplate="%{x}<br>%{y:.1f}%<extra></extra>",
+        ))
     fig.update_layout(
         title=None,
-        yaxis_title="% adoption",
+        yaxis_title="% of employees / projects",
         yaxis_range=[0, 100],
         legend=dict(orientation="h", y=-0.2, x=0),
+        height=380,
+    )
+    return fig
+
+
+def fig_alignment_over_time(alignment_rows: list[dict]) -> go.Figure:
+    """Stacked bar of Aligned / Add-Tools / Gap counts per month."""
+    months = sorted({r["month"] for r in alignment_rows})
+    by_month = {r["month"]: r for r in alignment_rows}
+
+    fig = go.Figure(layout=BASE_LAYOUT)
+    fig.add_trace(go.Bar(
+        x=months,
+        y=[int(by_month.get(m, {}).get("aligned", 0) or 0) for m in months],
+        name="✅ Aligned (L2+ with tools)",
+        marker_color="#16a34a",
+        hovertemplate="%{x}<br>Aligned: %{y}<extra></extra>",
+    ))
+    fig.add_trace(go.Bar(
+        x=months,
+        y=[int(by_month.get(m, {}).get("l2_with_tools", 0) or 0) for m in months],
+        name="↑ Add methodology (L2 with tools)",
+        marker_color="#eab308",
+        hovertemplate="%{x}<br>L2 cohort: %{y}<extra></extra>",
+    ))
+    fig.add_trace(go.Bar(
+        x=months,
+        y=[int(by_month.get(m, {}).get("gap_l34_no_tools", 0) or 0) for m in months],
+        name="⚠ Critical gap (L3+ no tools)",
+        marker_color="#dc2626",
+        hovertemplate="%{x}<br>Gap: %{y}<extra></extra>",
+    ))
+    fig.update_layout(
+        barmode="group",
+        yaxis_title="respondents",
+        legend=dict(orientation="h", y=-0.25, x=0),
         height=380,
     )
     return fig
@@ -349,7 +404,9 @@ def fig_assessments(assessment_rows: list[dict]) -> go.Figure:
 
 
 PLOTLY_CDN = (
-    '<script src="https://cdn.plot.ly/plotly-2.27.0.min.js" charset="utf-8"></script>'
+    "```{=html}\n"
+    '<script src="https://cdn.plot.ly/plotly-2.27.0.min.js" charset="utf-8"></script>\n'
+    "```"
 )
 
 
@@ -363,6 +420,7 @@ def build(history_dir: Path) -> str:
     churn_rows = read(history_dir / "license_churn.csv")
     assessment_rows = read(history_dir / "assessments_by_month.csv")
     assessment_dept_rows = read(history_dir / "assessments_by_dept_by_month.csv")
+    alignment_rows = read(history_dir / "assessment_alignment_by_month.csv")
 
     if not kpis:
         raise SystemExit(f"No history found at {history_dir}. Run data/aggregate.py first.")
@@ -388,7 +446,8 @@ def build(history_dir: Path) -> str:
     )
     md.append("")
 
-    # KPI tiles with deltas
+    # KPI tiles with deltas. "Employees with no tools" gets card-2 prominence,
+    # mirroring how the ExCo report leads with the activation gap.
     md.append('<div class="kpi-grid">')
     md.append(kpi_card(
         f'{float(curr["license_adoption_pct"]):.0f}%',
@@ -396,12 +455,13 @@ def build(history_dir: Path) -> str:
         delta(float(curr["license_adoption_pct"]),
               float(prev["license_adoption_pct"]) if prev else None),
     ))
-    md.append(kpi_card(
-        curr["total_license_seats"],
-        "Total license seats",
-        delta(int(curr["total_license_seats"]),
-              int(prev["total_license_seats"]) if prev else None, unit=""),
-    ))
+    no_tools_curr = int(curr.get("employees_no_tools") or 0)
+    no_tools_prev = int(prev.get("employees_no_tools") or 0) if prev else None
+    md.append(
+        f'<div class="kpi kpi-alert"><div class="kpi-value">{no_tools_curr}</div>'
+        f'<div class="kpi-label">Employees with no tools</div>'
+        f'<div class="kpi-sub">{delta(no_tools_curr, no_tools_prev, unit="")}</div></div>'
+    )
     md.append(kpi_card(
         f'{float(curr["project_ai_pct"]):.0f}%',
         "Projects using AI",
@@ -524,6 +584,20 @@ def build(history_dir: Path) -> str:
                     f'<td>{r["level_4"]}</td></tr>'
                 )
             md.append("</tbody></table>")
+            md.append("")
+
+        # Alignment matrix trend — aligned vs add-tools vs gap
+        if alignment_rows:
+            md.append("### Alignment matrix over time")
+            md.append("")
+            md.append(
+                '<p>Counts of respondents in each tools-vs-self-assessment '
+                'bucket. <strong>Aligned</strong> = L2+ with tools; '
+                '<strong>Add methodology</strong> = L2 with tools (move-the-'
+                'middle cohort); <strong>Critical gap</strong> = L3+ '
+                'self-assessed with no tools provisioned.</p>'
+            )
+            md.append(render(fig_alignment_over_time(alignment_rows), "chart-alignment"))
             md.append("")
     else:
         md.append(

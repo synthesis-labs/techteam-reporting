@@ -135,6 +135,7 @@ def monthly_kpis(snapshots: list[dict]) -> list[dict]:
         total_emp = len(s["employees"])
         lbe = licenses_by_employee(s["allocations"])
         with_lic = len(lbe)
+        no_tools = total_emp - with_lic
         tool_counts = Counter(r["tool"] for r in s["allocations"] if r.get("employee_code"))
 
         project_tags: dict[str, set[str]] = defaultdict(set)
@@ -151,7 +152,9 @@ def monthly_kpis(snapshots: list[dict]) -> list[dict]:
             "snapshot_date": f"{s['month']}-01",
             "total_employees": total_emp,
             "employees_with_license": with_lic,
+            "employees_no_tools": no_tools,
             "license_adoption_pct": round(with_lic / total_emp * 100, 2) if total_emp else 0,
+            "no_tools_pct": round(no_tools / total_emp * 100, 2) if total_emp else 0,
             "total_license_seats": sum(tool_counts.values()),
             "tools_active": sum(1 for t in TOOLS if tool_counts.get(t, 0) > 0),
             "total_projects": total_projects,
@@ -390,6 +393,95 @@ def assessments_by_month(snapshots: list[dict]) -> list[dict]:
     return rows
 
 
+def _level_int(self_level: str) -> int | None:
+    """Parse 'Level 2' / '2' → 2. Returns None if unparseable."""
+    if not self_level:
+        return None
+    m = re.search(r"\d+", self_level)
+    return int(m.group(0)) if m else None
+
+
+def assessment_alignment_by_month(snapshots: list[dict]) -> list[dict]:
+    """Cross-reference self-assessed maturity vs license allocations.
+
+    Mirrors the ExCo report's alignment matrix:
+      - aligned       — L2+ self-assessed AND has ≥1 tool licensed
+      - add_tools     — L2 self-assessed AND has ≥1 tool licensed but no
+                        higher-tier methodology signal (folded into aligned
+                        here; reported separately by the snapshot view)
+      - gap           — L3+ self-assessed AND has no tools (critical gap)
+      - tools_no_assess — has tools but didn't take the assessment
+      - assess_no_tools — took assessment at L0/L1 with no tools
+      - no_signal     — neither assessment nor tools
+
+    PII-safe: emits counts only.
+    """
+    rows = []
+    for s in snapshots:
+        if not s["assessments"]:
+            continue
+        lbe = licenses_by_employee(s["allocations"])
+        assess_by_code = {
+            r["employee_code"]: r for r in s["assessments"] if r.get("employee_code")
+        }
+        all_codes = {e["employee_code"] for e in s["employees"]}
+
+        aligned = 0          # L2+ AND has tools
+        add_tools = 0        # L2 AND has tools (subset of aligned; surfaced separately)
+        gap = 0              # L3+ AND no tools
+        l34_total = 0        # L3+ respondents (denominator for gap %)
+        l2_with_tools = 0    # L2 with tools — "move the middle" cohort
+        tools_no_assess = 0  # has tools, no assessment
+        assess_no_tools = 0  # has assessment, no tools, L<3
+        no_signal = 0        # neither tool nor assessment
+
+        for code in all_codes:
+            has_tools = code in lbe
+            assess = assess_by_code.get(code)
+            level = _level_int(assess.get("self_level", "")) if assess else None
+
+            if assess and level is not None:
+                if level >= 3:
+                    l34_total += 1
+                    if has_tools:
+                        aligned += 1
+                    else:
+                        gap += 1
+                elif level == 2:
+                    if has_tools:
+                        aligned += 1
+                        add_tools += 1
+                        l2_with_tools += 1
+                    else:
+                        assess_no_tools += 1
+                else:  # L0 or L1
+                    if has_tools:
+                        # has tools but self-assesses very low; counts toward
+                        # tools_no_assess bucket conceptually — leave as aligned
+                        # excluded
+                        pass
+                    else:
+                        assess_no_tools += 1
+            else:
+                if has_tools:
+                    tools_no_assess += 1
+                else:
+                    no_signal += 1
+
+        rows.append({
+            "month": s["month"],
+            "aligned": aligned,
+            "add_tools_l2": add_tools,
+            "gap_l34_no_tools": gap,
+            "l34_total": l34_total,
+            "l2_with_tools": l2_with_tools,
+            "tools_no_assessment": tools_no_assess,
+            "assessment_no_tools": assess_no_tools,
+            "no_signal": no_signal,
+        })
+    return rows
+
+
 def _is_developer(job_title: str) -> bool:
     """Heuristic: developer-track titles. Matches Engineer/Developer/Dev Lead."""
     if not job_title:
@@ -471,7 +563,8 @@ def main() -> None:
     tables = {
         "monthly_kpis.csv": (monthly_kpis(snapshots), [
             "month", "snapshot_date", "total_employees", "employees_with_license",
-            "license_adoption_pct", "total_license_seats", "tools_active",
+            "employees_no_tools", "license_adoption_pct", "no_tools_pct",
+            "total_license_seats", "tools_active",
             "total_projects", "active_projects", "projects_using_ai",
             "project_ai_pct", "unmatched_count", "assessment_responses",
         ]),
@@ -505,6 +598,11 @@ def main() -> None:
         "assessments_by_dept_by_month.csv": (assessments_by_dept_by_month(snapshots), [
             "month", "department", "responses", "developers", "non_developers",
             "avg_level", "level_0", "level_1", "level_2", "level_3", "level_4",
+        ]),
+        "assessment_alignment_by_month.csv": (assessment_alignment_by_month(snapshots), [
+            "month", "aligned", "add_tools_l2", "gap_l34_no_tools", "l34_total",
+            "l2_with_tools", "tools_no_assessment", "assessment_no_tools",
+            "no_signal",
         ]),
     }
 

@@ -59,6 +59,227 @@ def adoption_tier(pct: float) -> str:
     return "tier-poor"
 
 
+def _key_insights_block(
+    *,
+    dept_rows: list[tuple[str, int, int, float]],
+    tool_rows: list[tuple[str, int, float]],
+    license_adoption_pct: float,
+    employees_no_tools: int,
+    no_tools_pct: float,
+    total_employees: int,
+) -> list[str]:
+    """Auto-derive ExCo-style insight callouts from the snapshot's data.
+
+    No fixed copy: every callout is computed from `dept_rows` / `tool_rows`,
+    so the section stays accurate as adoption shifts month-on-month.
+    """
+    md: list[str] = []
+    md.append("## Key insights")
+    md.append("")
+    md.append(
+        '<p>Headline takeaways auto-derived from this snapshot — counts of '
+        'high-/low-adoption BUs, dominant tools, and activation gaps. The aim '
+        'is to surface what ExCo would otherwise pull out of the report by '
+        'hand.</p>'
+    )
+    md.append("")
+    md.append('<div class="insight-grid">')
+
+    # 🟢 BUs at 100% adoption
+    top_bus = [d for d, _, _, p in dept_rows if p >= 99.5]
+    if top_bus:
+        names = ", ".join(top_bus[:3]) + ("…" if len(top_bus) > 3 else "")
+        md.append(
+            f'<div class="insight insight-green"><span class="insight-icon">🟢</span>'
+            f'<div><div class="insight-headline">{len(top_bus)} BUs at 100% adoption</div>'
+            f'<div class="insight-detail">{names} fully equipped.</div></div></div>'
+        )
+
+    # 🟡 BUs in the 50-79% band — "capacity to close fast"
+    mid_bus = [(d, p) for d, _, _, p in dept_rows if 50 <= p < 80]
+    if mid_bus:
+        md.append(
+            f'<div class="insight insight-amber"><span class="insight-icon">🟡</span>'
+            f'<div><div class="insight-headline">{len(mid_bus)} BUs at 50–79% adoption</div>'
+            f'<div class="insight-detail">Capacity to close quickly with targeted activation.</div></div></div>'
+        )
+
+    # 🔴 BUs below 50% adoption — quick-win targets
+    low_bus = [(d, p) for d, _, _, p in dept_rows if 0 < p < 50]
+    zero_bus = [d for d, _, _, p in dept_rows if p == 0]
+    if low_bus or zero_bus:
+        n = len(low_bus) + len(zero_bus)
+        detail_parts: list[str] = []
+        if zero_bus:
+            detail_parts.append(f"{len(zero_bus)} BUs at 0%: " + ", ".join(zero_bus[:3]) + ("…" if len(zero_bus) > 3 else ""))
+        if low_bus:
+            detail_parts.append(f"{len(low_bus)} below 50%")
+        md.append(
+            f'<div class="insight insight-red"><span class="insight-icon">🔴</span>'
+            f'<div><div class="insight-headline">{n} BUs need activation</div>'
+            f'<div class="insight-detail">{"; ".join(detail_parts)}.</div></div></div>'
+        )
+
+    # 🤖 Most-used tool
+    nonzero_tools = [(t, n, p) for t, n, p in tool_rows if n > 0]
+    if nonzero_tools:
+        top_tool, top_n, top_pct = max(nonzero_tools, key=lambda r: r[1])
+        # Identify which tools are "niche" (<15% of workforce)
+        niche = [TOOL_DISPLAY[t] for t, _, p in nonzero_tools if p < 15]
+        niche_note = (
+            f' Niche tools (&lt;15%): {", ".join(niche)}.' if niche else ""
+        )
+        md.append(
+            f'<div class="insight insight-blue"><span class="insight-icon">🤖</span>'
+            f'<div><div class="insight-headline">{TOOL_DISPLAY[top_tool]} is most-used ({top_pct:.0f}%)</div>'
+            f'<div class="insight-detail">{top_n} of {total_employees} employees licensed.{niche_note}</div></div></div>'
+        )
+
+    # 📊 Overall adoption — industry benchmark callout
+    benchmark_lo, benchmark_hi = 55, 60
+    if license_adoption_pct >= benchmark_hi:
+        comparison = f"ahead of PS industry median (~{benchmark_lo}–{benchmark_hi}%)"
+    elif license_adoption_pct >= benchmark_lo:
+        comparison = f"at PS industry median (~{benchmark_lo}–{benchmark_hi}%)"
+    else:
+        comparison = f"below PS industry median (~{benchmark_lo}–{benchmark_hi}%)"
+    md.append(
+        f'<div class="insight insight-blue"><span class="insight-icon">📊</span>'
+        f'<div><div class="insight-headline">{license_adoption_pct:.1f}% overall — {comparison}</div>'
+        f'<div class="insight-detail">Licensed = at least one AI tool seat resolved to the employee.</div></div></div>'
+    )
+
+    # 🎯 Activation target — employees with no tools
+    md.append(
+        f'<div class="insight insight-amber"><span class="insight-icon">🎯</span>'
+        f'<div><div class="insight-headline">{employees_no_tools} employees ({no_tools_pct:.0f}%) have zero tools</div>'
+        f'<div class="insight-detail">Priority activation cohort for next month.</div></div></div>'
+    )
+
+    md.append("</div>")
+    md.append("")
+    return md
+
+
+def _strategic_themes_block(
+    *,
+    employees_no_tools: int,
+    alignment: dict | None,
+    unmatched_n: int,
+    assessments_loaded: bool,
+) -> list[str]:
+    """Three-card "what to do next" block: Priority / Scale / Amplify.
+
+    Mirrors §4 of the ExCo report — but with counts pulled from the data, so
+    the framing stays honest as numbers shift.
+    """
+    md: list[str] = []
+    md.append("## Strategic themes — next month")
+    md.append("")
+    md.append(
+        '<p>Three concrete cohorts to action next month, derived from the '
+        'data above. Numbers in <strong>bold</strong> are pulled from this '
+        "snapshot; framings (PRIORITY / SCALE / AMPLIFY) mirror the ExCo report's "
+        '§4.</p>'
+    )
+    md.append("")
+
+    # PRIORITY — tool provisioning gap
+    gap_n: int | None = None
+    if alignment is not None:
+        gap_n = int(alignment.get("gap_l34_no_tools", 0) or 0)
+    priority_lines: list[str] = []
+    if gap_n is not None and gap_n > 0:
+        priority_lines.append(
+            f"<strong>{gap_n}</strong> respondents self-assessed L3/L4 with no tools provisioned."
+        )
+    priority_lines.append(
+        f"<strong>{employees_no_tools}</strong> total employees have zero AI tools."
+    )
+    if unmatched_n > 0:
+        priority_lines.append(
+            f"<strong>{unmatched_n}</strong> unresolved license rows blocking accurate counts."
+        )
+    priority_actions = [
+        "Provision Claude / ChatGPT licences for AI-active project teams this week.",
+        "Resolve outstanding unmatched handles via <code>aliases.csv</code>.",
+        "Establish a licence-request SLA (target: 48 hrs).",
+    ]
+
+    # SCALE — move the L2 middle
+    l2_with_tools = int((alignment or {}).get("l2_with_tools", 0) or 0)
+    scale_lines: list[str] = []
+    if l2_with_tools > 0:
+        scale_lines.append(
+            f"<strong>{l2_with_tools}</strong> respondents at L2 with tools licensed."
+        )
+        scale_lines.append("They use AI reactively, not yet in their workflow.")
+    elif assessments_loaded:
+        scale_lines.append("No L2-with-tools cohort detected this snapshot.")
+    else:
+        scale_lines.append("Load AI Maturity Self-Assessment responses to size this cohort.")
+    scale_actions = [
+        "Launch an L2→L3 upskilling cohort using internal AI methodology.",
+        "Focus on the largest BUs first — biggest leverage per session.",
+        "Pair each cohort member with a daily AI workflow exercise.",
+    ]
+
+    # AMPLIFY — L3/L4 champions
+    l34_n = int((alignment or {}).get("l34_total", 0) or 0)
+    amplify_lines: list[str] = []
+    if l34_n > 0:
+        amplify_lines.append(
+            f"<strong>{l34_n}</strong> respondents self-assessed L3/L4 — strategic AI practitioners."
+        )
+    elif assessments_loaded:
+        amplify_lines.append("No L3/L4 respondents this snapshot.")
+    else:
+        amplify_lines.append("Load AI Maturity Self-Assessment responses to identify champions.")
+    if assessments_loaded:
+        amplify_lines.append("Chase non-respondents to fill in coverage gaps.")
+    amplify_actions = [
+        "Formalise an internal AI champions programme.",
+        "Pair champions with lagging BUs as embedded mentors.",
+        "Capture champion playbooks for reuse across the org.",
+    ]
+
+    def _theme_card(klass: str, icon: str, badge: str, title: str,
+                    lines: list[str], actions: list[str]) -> str:
+        body_lines = "".join(f"<li>{line}</li>" for line in lines)
+        action_lines = "".join(f"<li>{a}</li>" for a in actions)
+        return (
+            f'<div class="theme-card {klass}">'
+            f'<div class="theme-header"><span class="theme-icon">{icon}</span>'
+            f'<span class="theme-badge">{badge}</span></div>'
+            f'<div class="theme-title">{title}</div>'
+            f'<ul class="theme-body">{body_lines}</ul>'
+            f'<div class="theme-divider">Recommended actions</div>'
+            f'<ul class="theme-actions">{action_lines}</ul>'
+            f'</div>'
+        )
+
+    md.append('<div class="theme-grid">')
+    md.append(_theme_card(
+        "theme-red", "🔴", "PRIORITY",
+        "Tool provisioning gap",
+        priority_lines, priority_actions,
+    ))
+    md.append(_theme_card(
+        "theme-amber", "🟡", "SCALE",
+        "Move the L2 middle",
+        scale_lines, scale_actions,
+    ))
+    md.append(_theme_card(
+        "theme-green", "🟢", "AMPLIFY",
+        "L3 / L4 AI champions",
+        amplify_lines, amplify_actions,
+    ))
+    md.append("</div>")
+    md.append("")
+
+    return md
+
+
 def bar(pct: float, label: str, count: int, total: int, klass: str = "") -> str:
     width = max(0, min(100, pct))
     return (
@@ -91,6 +312,7 @@ def build(month: str, root: Path, history_dir: Path | None = None) -> str:
     ratings_history = _filter_history(read(hist / "ratings_by_tier_by_month.csv"), month)
     assessments_by_month = _filter_history(read(hist / "assessments_by_month.csv"), month)
     assessments_by_dept = _filter_history(read(hist / "assessments_by_dept_by_month.csv"), month)
+    alignment_history = _filter_history(read(hist / "assessment_alignment_by_month.csv"), month)
 
     total_employees = len(employees)
 
@@ -175,7 +397,10 @@ def build(month: str, root: Path, history_dir: Path | None = None) -> str:
     )
     md.append("")
 
-    # Headline KPIs
+    employees_no_tools = total_employees - employees_with_license
+    no_tools_pct = (employees_no_tools / total_employees * 100) if total_employees else 0
+
+    # Headline KPIs — the "what should ExCo see first" row.
     md.append('<div class="kpi-grid">')
     md.append(
         f'<div class="kpi"><div class="kpi-value">{license_adoption_pct:.0f}%</div>'
@@ -183,22 +408,33 @@ def build(month: str, root: Path, history_dir: Path | None = None) -> str:
         f'<div class="kpi-sub">{employees_with_license} of {total_employees} employees</div></div>'
     )
     md.append(
-        f'<div class="kpi"><div class="kpi-value">{len(allocations)}</div>'
-        f'<div class="kpi-label">Total license seats</div>'
-        f'<div class="kpi-sub">across {sum(1 for _,n,_ in tool_rows if n>0)} tools</div></div>'
+        f'<div class="kpi kpi-alert"><div class="kpi-value">{employees_no_tools}</div>'
+        f'<div class="kpi-label">Employees with no tools</div>'
+        f'<div class="kpi-sub">{no_tools_pct:.0f}% of org — priority activation</div></div>'
     )
     md.append(
         f'<div class="kpi"><div class="kpi-value">{project_ai_pct:.0f}%</div>'
         f'<div class="kpi-label">Projects using AI</div>'
-        f'<div class="kpi-sub">{projects_using_ai} of {total_projects} projects</div></div>'
+        f'<div class="kpi-sub">{projects_using_ai} of {total_projects} projects ({active_projects} active)</div></div>'
     )
     md.append(
-        f'<div class="kpi"><div class="kpi-value">{active_projects}</div>'
-        f'<div class="kpi-label">Active projects</div>'
-        f'<div class="kpi-sub">{total_projects} total tracked</div></div>'
+        f'<div class="kpi"><div class="kpi-value">{len(allocations)}</div>'
+        f'<div class="kpi-label">Total license seats</div>'
+        f'<div class="kpi-sub">across {sum(1 for _,n,_ in tool_rows if n>0)} tools</div></div>'
     )
     md.append("</div>")
     md.append("")
+
+    # Key Insights — auto-derived from the underlying data. Mirrors the
+    # 🟢 / 🟡 / 🔴 / 🤖 / 📊 / 🎯 callout column in the ExCo report.
+    md.extend(_key_insights_block(
+        dept_rows=dept_rows,
+        tool_rows=tool_rows,
+        license_adoption_pct=license_adoption_pct,
+        employees_no_tools=employees_no_tools,
+        no_tools_pct=no_tools_pct,
+        total_employees=total_employees,
+    ))
 
     # License allocation by tool (now with month-over-month delta)
     md.append("## License allocation by tool")
@@ -337,15 +573,56 @@ def build(month: str, root: Path, history_dir: Path | None = None) -> str:
     md.append("")
     if assessments:
         total_resp = len(assessments)
+        response_rate_pct = (total_resp / total_employees * 100) if total_employees else 0
+
+        # Compute headline numbers from the level distribution
         level_dist = sorted(
             ((r["self_level"], int(r["count"]), float(r["share"])) for r in assessments_by_month),
             key=lambda x: x[0],
         )
+        # Avg numeric level (Level 0..4)
+        weighted_sum = 0.0
+        weighted_n = 0
+        for lvl, count, _ in level_dist:
+            m = re.search(r"\d+", lvl or "")
+            if m:
+                weighted_sum += int(m.group(0)) * count
+                weighted_n += count
+        avg_level = (weighted_sum / weighted_n) if weighted_n else None
+
+        # Headline KPI strip
+        md.append('<div class="kpi-grid kpi-grid-secondary">')
         md.append(
-            f'<p><strong>{total_resp} responses</strong> from the AI Maturity '
-            f'Self-Assessment. Bars show the share of respondents at each '
-            f'self-assigned maturity level (L0 = no AI familiarity, '
-            f'L4 = embeds AI in their workflow).</p>'
+            f'<div class="kpi"><div class="kpi-value">{total_resp}</div>'
+            f'<div class="kpi-label">Respondents</div>'
+            f'<div class="kpi-sub">{response_rate_pct:.0f}% of {total_employees} employees</div></div>'
+        )
+        avg_disp = f"{avg_level:.2f} / 4" if avg_level is not None else "—"
+        md.append(
+            f'<div class="kpi"><div class="kpi-value">{avg_disp}</div>'
+            f'<div class="kpi-label">Avg self-level</div>'
+            f'<div class="kpi-sub">Weighted across L0–L4 responses</div></div>'
+        )
+        l34 = sum(c for lvl, c, _ in level_dist if (re.search(r"\d+", lvl or "") and int(re.search(r"\d+", lvl).group(0)) >= 3))
+        md.append(
+            f'<div class="kpi"><div class="kpi-value">{l34}</div>'
+            f'<div class="kpi-label">L3 + L4 respondents</div>'
+            f'<div class="kpi-sub">Strategic AI practitioners</div></div>'
+        )
+        l2_count = sum(c for lvl, c, _ in level_dist if (re.search(r"\d+", lvl or "") and int(re.search(r"\d+", lvl).group(0)) == 2))
+        md.append(
+            f'<div class="kpi"><div class="kpi-value">{l2_count}</div>'
+            f'<div class="kpi-label">L2 — Selective</div>'
+            f'<div class="kpi-sub">The "move the middle" cohort</div></div>'
+        )
+        md.append("</div>")
+        md.append("")
+
+        md.append(
+            '<p>Distribution of self-reported AI maturity. '
+            '<strong>L0</strong> = resistant, <strong>L1</strong> = experimental, '
+            '<strong>L2</strong> = selective, <strong>L3</strong> = integrated, '
+            '<strong>L4</strong> = strategic.</p>'
         )
         md.append("")
         md.append('<div class="bar-block">')
@@ -354,8 +631,45 @@ def build(month: str, root: Path, history_dir: Path | None = None) -> str:
         md.append("</div>")
         md.append("")
 
+        # Alignment matrix — joins assessment level with license allocation.
+        # Tells the "who's saying L4 but has no tools?" story.
+        if alignment_history:
+            a = alignment_history[0]
+            aligned = int(a.get("aligned", 0))
+            add_tools = int(a.get("add_tools_l2", 0))
+            gap = int(a.get("gap_l34_no_tools", 0))
+            md.append("### Tools vs self-assessment — alignment matrix")
+            md.append("")
+            md.append(
+                '<p>Cross-reference of self-assessed maturity against license '
+                'allocation, scoped to the employees who responded. The '
+                '<strong>Gap</strong> bucket is the most actionable — L3/L4 '
+                'self-assessed individuals with zero tools provisioned.</p>'
+            )
+            md.append("")
+            md.append('<div class="align-grid">')
+            md.append(
+                f'<div class="align-card align-good"><div class="align-value">{aligned}</div>'
+                f'<div class="align-label">✅ Aligned</div>'
+                f'<div class="align-sub">L2+ self-assessed AND ≥1 tool licensed</div></div>'
+            )
+            md.append(
+                f'<div class="align-card align-warn"><div class="align-value">{add_tools}</div>'
+                f'<div class="align-label">↑ Add methodology</div>'
+                f'<div class="align-sub">L2 with tools — ready to move to L3</div></div>'
+            )
+            md.append(
+                f'<div class="align-card align-danger"><div class="align-value">{gap}</div>'
+                f'<div class="align-label">⚠ Critical gap</div>'
+                f'<div class="align-sub">L3/L4 self-assessed but no tools provisioned</div></div>'
+            )
+            md.append("</div>")
+            md.append("")
+
         # Per-department breakdown
         if assessments_by_dept:
+            md.append("### By department")
+            md.append("")
             md.append('<table class="adoption-table">')
             md.append(
                 "<thead><tr><th>Department</th><th>Responses</th>"
@@ -386,6 +700,16 @@ def build(month: str, root: Path, history_dir: Path | None = None) -> str:
             'populate this section.</p>'
         )
         md.append("")
+
+    # Strategic Themes — the three-card "what to do next" summary that mirrors
+    # the ExCo report's PRIORITY / SCALE / AMPLIFY framing. Numbers come from
+    # the alignment matrix where available; otherwise from license allocation.
+    md.extend(_strategic_themes_block(
+        employees_no_tools=employees_no_tools,
+        alignment=(alignment_history[0] if alignment_history else None),
+        unmatched_n=len(unmatched),
+        assessments_loaded=bool(assessments),
+    ))
 
     # Data quality
     md.append("## Data quality")
