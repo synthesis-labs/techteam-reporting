@@ -21,6 +21,54 @@ main.content {
   max-width: 1200px;
 }
 
+/* --- Quick section navigation --- */
+
+.section-nav {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.65rem;
+  margin: 0.4rem 0 1.35rem;
+  padding: 0.7rem 0.8rem;
+  background: linear-gradient(90deg, #f8fafc, #eef2ff);
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+}
+
+.section-nav-label {
+  font-size: 0.63rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  font-weight: 700;
+  color: #64748b;
+}
+
+.section-nav-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+}
+
+.section-chip {
+  display: inline-block;
+  padding: 0.28rem 0.58rem;
+  border-radius: 999px;
+  border: 1px solid #cbd5e1;
+  background: #ffffff;
+  color: #0f3460;
+  font-size: 0.73rem;
+  font-weight: 600;
+  line-height: 1;
+  text-decoration: none;
+  transition: all 0.18s ease;
+}
+
+.section-chip:hover {
+  border-color: #0f3460;
+  background: #e0e7ff;
+  color: #0b2547;
+}
+
 /* --- Title block --- */
 
 #title-block-header {
@@ -85,6 +133,7 @@ h2 {
   border-bottom: 1px solid #ADB5BD !important;
   padding-bottom: 0.4rem !important;
   margin: 2.25rem 0 1rem !important;
+  scroll-margin-top: 88px;
 }
 
 /* --- Body prose --- */
@@ -445,6 +494,52 @@ table.adoption-table {
   font-size: 0.88rem;
 }
 
+.table-shell {
+  margin: 0.45rem 0 1rem;
+}
+
+.table-controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.8rem;
+  flex-wrap: wrap;
+  margin: 0 0 0.45rem;
+}
+
+.table-search {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  font-size: 0.68rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #64748b;
+  font-weight: 700;
+}
+
+.table-search input {
+  width: 250px;
+  max-width: 72vw;
+  border: 1px solid #cbd5e1;
+  border-radius: 4px;
+  padding: 0.36rem 0.5rem;
+  font-size: 0.82rem;
+  color: #1f2937;
+  background: #ffffff;
+}
+
+.table-search input:focus {
+  outline: none;
+  border-color: #0f3460;
+  box-shadow: 0 0 0 3px rgba(15, 52, 96, 0.12);
+}
+
+.table-meta {
+  font-size: 0.75rem;
+  color: #6b7280;
+}
+
 .adoption-table th {
   background: #1A1A2E;
   color: white;
@@ -455,6 +550,38 @@ table.adoption-table {
   text-transform: uppercase;
   letter-spacing: 0.1em;
   border: 1px solid #1A1A2E;
+}
+
+.adoption-table thead th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+
+.adoption-table thead th.sortable {
+  cursor: pointer;
+  user-select: none;
+  white-space: nowrap;
+  position: relative;
+  padding-right: 1.2rem;
+}
+
+.adoption-table thead th.sortable::after {
+  content: "↕";
+  position: absolute;
+  right: 0.35rem;
+  color: #94a3b8;
+  font-size: 0.65rem;
+}
+
+.adoption-table thead th.sorted-asc::after {
+  content: "▲";
+  color: #e2e8f0;
+}
+
+.adoption-table thead th.sorted-desc::after {
+  content: "▼";
+  color: #e2e8f0;
 }
 
 .adoption-table th:nth-child(n+2) {
@@ -531,6 +658,34 @@ table.adoption-table {
   line-height: 1.4;
 }
 
+/* --- Back to top button --- */
+
+.back-to-top {
+  position: fixed;
+  right: 1.1rem;
+  bottom: 1.1rem;
+  border: none;
+  border-radius: 999px;
+  padding: 0.48rem 0.84rem;
+  background: #0f3460;
+  color: white;
+  font-size: 0.76rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  box-shadow: 0 6px 16px rgba(15, 52, 96, 0.28);
+  opacity: 0;
+  transform: translateY(10px);
+  pointer-events: none;
+  transition: all 0.2s ease;
+}
+
+.back-to-top.visible {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
 /* --- Notes and footer --- */
 
 p.note {
@@ -558,4 +713,31 @@ p.footer {
   .theme-grid  { grid-template-columns: 1fr; }
   .bar-row     { grid-template-columns: 130px 1fr 100px; gap: 0.6rem; }
   main.content { padding: 2rem 1.5rem; }
+  .table-controls { align-items: stretch; }
+  .table-search { width: 100%; justify-content: space-between; }
+  .table-search input { width: 65%; }
+}
+
+@media (max-width: 640px) {
+  .section-nav {
+    padding: 0.65rem;
+  }
+
+  .table-search {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .table-search input {
+    width: 100%;
+  }
+
+  .bar-row {
+    grid-template-columns: 1fr;
+    gap: 0.35rem;
+  }
+
+  .bar-value {
+    text-align: left;
+  }
 }
