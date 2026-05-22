@@ -33,5 +33,6 @@ format:
   html:
     theme: default
     css: style.css
+    include-after-body: interactions.html
     toc: false
     page-layout: full

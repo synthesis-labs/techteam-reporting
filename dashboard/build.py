@@ -895,6 +895,7 @@ def write_quarto_yml(months_newest_first: list[str], out: Path) -> None:
         "  html:",
         "    theme: default",
         "    css: style.css",
+        "    include-after-body: interactions.html",
         "    toc: false",
         "    page-layout: full",
     ]
