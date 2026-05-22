@@ -5,6 +5,9 @@ project:
   render:
     - trends.md
     - snapshot-2026-05.md
+    - snapshot-2026-04-final.md
+    - snapshot-2026-04.md
+    - snapshot-2026-03.md
 
 website:
   title: "AI Adoption and Maturity Dashboard"
@@ -19,6 +22,12 @@ website:
         contents:
           - text: "2026-05"
             href: snapshot-2026-05.html
+          - text: "2026-04-final"
+            href: snapshot-2026-04-final.html
+          - text: "2026-04"
+            href: snapshot-2026-04.html
+          - text: "2026-03"
+            href: snapshot-2026-03.html
 
 format:
   html:

@@ -1,1 +1,135 @@
 month,prev_month,change_type,tool,department,count
+2026-04,2026-03,lost,chatgpt,Business Enablement Operations,1
+2026-04,2026-03,lost,chatgpt,Cloud,1
+2026-04,2026-03,lost,chatgpt,Code,3
+2026-04,2026-03,lost,chatgpt,Project Management Office,1
+2026-04,2026-03,lost,chatgpt,RegTech,1
+2026-04,2026-03,lost,chatgpt,Sales,1
+2026-04,2026-03,lost,claude,Executive,1
+2026-04,2026-03,lost,claude,Sales,1
+2026-04,2026-03,lost,cursor,Executive,2
+2026-04,2026-03,new,chatgpt,Business Enablement Operations,2
+2026-04,2026-03,new,chatgpt,Cloud,1
+2026-04,2026-03,new,chatgpt,Code,2
+2026-04,2026-03,new,chatgpt,Cryptography,1
+2026-04,2026-03,new,chatgpt,Halo,1
+2026-04,2026-03,new,chatgpt,Intelligent Data,1
+2026-04,2026-03,new,chatgpt,Managed Operations,2
+2026-04,2026-03,new,chatgpt,RegTech,4
+2026-04,2026-03,new,chatgpt,Sales,2
+2026-04,2026-03,new,claude,Business Enablement Operations,1
+2026-04,2026-03,new,claude,Cloud,3
+2026-04,2026-03,new,claude,Code,10
+2026-04,2026-03,new,claude,Halo,1
+2026-04,2026-03,new,claude,Intelligent Data,3
+2026-04,2026-03,new,claude,Managed Operations,1
+2026-04,2026-03,new,claude,RegTech,8
+2026-04,2026-03,new,claude,Sales,1
+2026-04,2026-03,new,copilot,RegTech,2
+2026-04,2026-03,new,cursor,Cloud,1
+2026-04,2026-03,new,cursor,Code,1
+2026-04,2026-03,new,cursor,Technology,1
+2026-04,2026-03,retained,chatgpt,Business Enablement Operations,1
+2026-04,2026-03,retained,chatgpt,Cloud,6
+2026-04,2026-03,retained,chatgpt,Code,14
+2026-04,2026-03,retained,chatgpt,Executive,5
+2026-04,2026-03,retained,chatgpt,Finance,3
+2026-04,2026-03,retained,chatgpt,Halo,7
+2026-04,2026-03,retained,chatgpt,Human Resources,1
+2026-04,2026-03,retained,chatgpt,Intelligent Data,6
+2026-04,2026-03,retained,chatgpt,Managed Operations,8
+2026-04,2026-03,retained,chatgpt,Payments,1
+2026-04,2026-03,retained,chatgpt,Project Management Office,1
+2026-04,2026-03,retained,chatgpt,RegTech,8
+2026-04,2026-03,retained,chatgpt,Sales,6
+2026-04,2026-03,retained,chatgpt,Technology,2
+2026-04,2026-03,retained,claude,Business Enablement Operations,2
+2026-04,2026-03,retained,claude,Cloud,3
+2026-04,2026-03,retained,claude,Code,8
+2026-04,2026-03,retained,claude,Executive,4
+2026-04,2026-03,retained,claude,Halo,5
+2026-04,2026-03,retained,claude,Intelligent Data,4
+2026-04,2026-03,retained,claude,Managed Operations,2
+2026-04,2026-03,retained,claude,Payments,3
+2026-04,2026-03,retained,claude,Project Management Office,3
+2026-04,2026-03,retained,claude,RegTech,1
+2026-04,2026-03,retained,claude,Sales,6
+2026-04,2026-03,retained,claude,Technology,2
+2026-04,2026-03,retained,copilot,Cloud,3
+2026-04,2026-03,retained,copilot,Code,6
+2026-04,2026-03,retained,copilot,Executive,2
+2026-04,2026-03,retained,copilot,Intelligent Data,2
+2026-04,2026-03,retained,copilot,RegTech,2
+2026-04,2026-03,retained,cursor,Business Enablement Operations,1
+2026-04,2026-03,retained,cursor,Cloud,2
+2026-04,2026-03,retained,cursor,Code,11
+2026-04,2026-03,retained,cursor,Halo,1
+2026-04,2026-03,retained,cursor,Technology,1
+2026-04,2026-03,retained,gemini,Cloud,6
+2026-04,2026-03,retained,gemini,Code,3
+2026-04,2026-03,retained,gemini,Finance,1
+2026-04,2026-03,retained,gemini,Halo,1
+2026-04,2026-03,retained,gemini,Intelligent Data,4
+2026-04,2026-03,retained,gemini,Managed Operations,1
+2026-04,2026-03,retained,gemini,Sales,1
+2026-05,2026-04,lost,chatgpt,(no department),2
+2026-05,2026-04,lost,chatgpt,Cloud,1
+2026-05,2026-04,lost,chatgpt,RegTech,2
+2026-05,2026-04,lost,claude,(no department),2
+2026-05,2026-04,lost,copilot,(no department),1
+2026-05,2026-04,lost,copilot,Cloud,2
+2026-05,2026-04,new,claude,Business Enablement Operations,1
+2026-05,2026-04,new,claude,Cloud,1
+2026-05,2026-04,new,claude,Code,4
+2026-05,2026-04,new,claude,Executive,1
+2026-05,2026-04,new,claude,Halo,1
+2026-05,2026-04,new,claude,Intelligent Data,3
+2026-05,2026-04,new,claude,Managed Operations,2
+2026-05,2026-04,new,claude,Project Management Office,1
+2026-05,2026-04,new,claude,RegTech,3
+2026-05,2026-04,retained,chatgpt,Business Enablement Operations,3
+2026-05,2026-04,retained,chatgpt,Cloud,6
+2026-05,2026-04,retained,chatgpt,Code,14
+2026-05,2026-04,retained,chatgpt,Cryptography,1
+2026-05,2026-04,retained,chatgpt,Executive,5
+2026-05,2026-04,retained,chatgpt,Finance,3
+2026-05,2026-04,retained,chatgpt,Halo,8
+2026-05,2026-04,retained,chatgpt,Human Resources,1
+2026-05,2026-04,retained,chatgpt,Intelligent Data,7
+2026-05,2026-04,retained,chatgpt,Managed Operations,10
+2026-05,2026-04,retained,chatgpt,Payments,1
+2026-05,2026-04,retained,chatgpt,Product,1
+2026-05,2026-04,retained,chatgpt,Product Incubation,1
+2026-05,2026-04,retained,chatgpt,Project Management Office,1
+2026-05,2026-04,retained,chatgpt,RegTech,9
+2026-05,2026-04,retained,chatgpt,Sales,7
+2026-05,2026-04,retained,chatgpt,Technology,2
+2026-05,2026-04,retained,claude,Business Enablement Operations,3
+2026-05,2026-04,retained,claude,Cloud,6
+2026-05,2026-04,retained,claude,Code,17
+2026-05,2026-04,retained,claude,Executive,4
+2026-05,2026-04,retained,claude,Halo,6
+2026-05,2026-04,retained,claude,Intelligent Data,7
+2026-05,2026-04,retained,claude,Managed Operations,3
+2026-05,2026-04,retained,claude,Payments,3
+2026-05,2026-04,retained,claude,Project Management Office,3
+2026-05,2026-04,retained,claude,RegTech,9
+2026-05,2026-04,retained,claude,Sales,6
+2026-05,2026-04,retained,claude,Technology,2
+2026-05,2026-04,retained,copilot,Cloud,1
+2026-05,2026-04,retained,copilot,Code,5
+2026-05,2026-04,retained,copilot,Executive,2
+2026-05,2026-04,retained,copilot,Intelligent Data,2
+2026-05,2026-04,retained,copilot,RegTech,4
+2026-05,2026-04,retained,cursor,Business Enablement Operations,1
+2026-05,2026-04,retained,cursor,Cloud,3
+2026-05,2026-04,retained,cursor,Code,12
+2026-05,2026-04,retained,cursor,Halo,1
+2026-05,2026-04,retained,cursor,Technology,2
+2026-05,2026-04,retained,gemini,Cloud,6
+2026-05,2026-04,retained,gemini,Code,3
+2026-05,2026-04,retained,gemini,Finance,1
+2026-05,2026-04,retained,gemini,Halo,1
+2026-05,2026-04,retained,gemini,Intelligent Data,4
+2026-05,2026-04,retained,gemini,Managed Operations,1
+2026-05,2026-04,retained,gemini,Sales,1

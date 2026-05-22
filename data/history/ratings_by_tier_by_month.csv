@@ -1,4 +1,19 @@
 month,tier,tier_label,projects_scored,mean_overall_rating,mean_budget_score,mean_delivery_score,mean_team_score,mean_csat_score,mean_scope_health_score
+2026-03,L3,L3 — CI/CD & Full AI,0,,,,,,
+2026-03,L2,L2 — AI for Development,0,,,,,,
+2026-03,L1,L1 — Research,0,,,,,,
+2026-03,L0,L0 — No AI,0,,,,,,
+2026-03,TBD,TBD,0,,,,,,
+2026-04,L3,L3 — CI/CD & Full AI,0,,,,,,
+2026-04,L2,L2 — AI for Development,0,,,,,,
+2026-04,L1,L1 — Research,0,,,,,,
+2026-04,L0,L0 — No AI,0,,,,,,
+2026-04,TBD,TBD,0,,,,,,
+2026-04-final,L3,L3 — CI/CD & Full AI,0,,,,,,
+2026-04-final,L2,L2 — AI for Development,0,,,,,,
+2026-04-final,L1,L1 — Research,0,,,,,,
+2026-04-final,L0,L0 — No AI,0,,,,,,
+2026-04-final,TBD,TBD,0,,,,,,
 2026-05,L3,L3 — CI/CD & Full AI,5,4.75,5.0,4.6,4.8,5.0,4.0
 2026-05,L2,L2 — AI for Development,9,4.07,3.67,4.11,4.11,4.56,4.11
 2026-05,L1,L1 — Research,8,4.73,4.62,4.75,4.75,4.75,4.88

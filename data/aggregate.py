@@ -57,6 +57,9 @@ RATING_FIELDS = [
 ]
 
 MONTH_RE = re.compile(r"^\d{4}-\d{2}$")
+# Matches `standardised` (primary snapshot for a month) or `standardised-<suffix>`
+# (alternate views of the same month — separate snapshot IDs, not merged).
+STANDARDISED_RE = re.compile(r"^standardised(?:-(?P<suffix>[A-Za-z0-9][A-Za-z0-9_-]*))?$")
 
 
 def project_tier(tags: set[str]) -> str:
@@ -100,18 +103,50 @@ def write(path: Path, rows: list[dict], fieldnames: list[str]) -> None:
             w.writerow({k: r.get(k, "") for k in fieldnames})
 
 
+def snapshot_id(month: str, suffix: str | None) -> str:
+    """Combine YYYY-MM + optional standardised-* suffix into a snapshot ID.
+
+    `standardised/` → `2026-04`; `standardised-final/` → `2026-04-final`.
+    """
+    return f"{month}-{suffix}" if suffix else month
+
+
+def discover_snapshots(data_root: Path) -> list[tuple[str, Path]]:
+    """Return (snapshot_id, standardised_dir) for every snapshot under data_root.
+
+    A snapshot is any `standardised` or `standardised-<suffix>` folder under a
+    YYYY-MM month directory. Alternate snapshots stand alongside the primary
+    one (they are separate views of the same period, never merged).
+    """
+    out: list[tuple[str, Path]] = []
+    for month_dir in sorted(data_root.iterdir()):
+        if not (month_dir.is_dir() and MONTH_RE.match(month_dir.name)):
+            continue
+        for child in sorted(month_dir.iterdir()):
+            if not child.is_dir():
+                continue
+            m = STANDARDISED_RE.match(child.name)
+            if not m:
+                continue
+            out.append((snapshot_id(month_dir.name, m.group("suffix")), child))
+    return out
+
+
 def discover_months(data_root: Path) -> list[str]:
-    return sorted(
-        d.name for d in data_root.iterdir()
-        if d.is_dir() and MONTH_RE.match(d.name)
-        and (d / "standardised").is_dir()
-    )
+    """Backwards-compatible: returns sorted snapshot IDs (incl. suffixed ones)."""
+    return [sid for sid, _ in discover_snapshots(data_root)]
 
 
-def load_month(data_root: Path, month: str) -> dict:
-    std = data_root / month / "standardised"
+def is_alternate_snapshot(snapshot_id_: str) -> bool:
+    """Suffixed snapshots (e.g. 2026-04-final) are alternate views — they
+    sit alongside the primary snapshot for the same month and don't belong
+    on the month-to-month churn chain."""
+    return not MONTH_RE.match(snapshot_id_)
+
+
+def load_snapshot(snapshot_id_: str, std: Path) -> dict:
     return {
-        "month": month,
+        "month": snapshot_id_,
         "employees": read(std / "employees.csv"),
         "allocations": read(std / "license_allocations.csv"),
         "unmatched": read(std / "unmatched.csv"),
@@ -119,6 +154,16 @@ def load_month(data_root: Path, month: str) -> dict:
         "ai_usage": read(std / "project_ai_usage.csv"),
         "assessments": read(std / "assessments.csv"),
     }
+
+
+def load_month(data_root: Path, snapshot_id_: str) -> dict:
+    """Load a snapshot by ID. Resolves `2026-04` → `2026-04/standardised/`
+    and `2026-04-final` → `2026-04/standardised-final/`.
+    """
+    for sid, std in discover_snapshots(data_root):
+        if sid == snapshot_id_:
+            return load_snapshot(sid, std)
+    raise FileNotFoundError(f"No snapshot {snapshot_id_!r} under {data_root}")
 
 
 def licenses_by_employee(allocations: list[dict]) -> dict[str, set[str]]:
@@ -147,9 +192,12 @@ def monthly_kpis(snapshots: list[dict]) -> list[dict]:
         total_projects = len(s["projects"])
         active_projects = sum(1 for p in s["projects"] if p.get("active") == "true")
 
+        # For alternate snapshots like `2026-04-final`, take the YYYY-MM prefix
+        # for the calendar date (`2026-04-01`); the suffix is identity, not time.
+        cal_month = s["month"][:7] if not MONTH_RE.match(s["month"]) else s["month"]
         rows.append({
             "month": s["month"],
-            "snapshot_date": f"{s['month']}-01",
+            "snapshot_date": f"{cal_month}-01",
             "total_employees": total_emp,
             "employees_with_license": with_lic,
             "employees_no_tools": no_tools,
@@ -168,6 +216,9 @@ def monthly_kpis(snapshots: list[dict]) -> list[dict]:
 
 
 def tool_adoption_by_month(snapshots: list[dict]) -> list[dict]:
+    """Per-tool seat counts. Δ vs prior is computed against the prior **primary**
+    snapshot — alternate snapshots (e.g. `2026-04-final`) don't shift the chain
+    forward, so May still deltas against the original April."""
     rows = []
     prev_seats: dict[str, int] = {}
     for s in snapshots:
@@ -175,6 +226,7 @@ def tool_adoption_by_month(snapshots: list[dict]) -> list[dict]:
         tool_counts = Counter(
             r["tool"] for r in s["allocations"] if r.get("employee_code")
         )
+        alt = is_alternate_snapshot(s["month"])
         for tool in TOOLS:
             seats = tool_counts.get(tool, 0)
             prev = prev_seats.get(tool)
@@ -186,7 +238,8 @@ def tool_adoption_by_month(snapshots: list[dict]) -> list[dict]:
                 "delta_vs_prior": "" if prev is None else seats - prev,
                 "prev_seats": "" if prev is None else prev,
             })
-            prev_seats[tool] = seats
+            if not alt:
+                prev_seats[tool] = seats
     return rows
 
 
@@ -331,11 +384,15 @@ def license_churn(snapshots: list[dict]) -> list[dict]:
 
     Per-employee detail is deliberately omitted — this table is published
     publicly, so it must not allow reconstruction of individual license events.
+
+    Alternate snapshots (e.g. `2026-04-final`) are skipped here: they are
+    separate views of the same period, not points on the monthly churn chain.
     """
+    primary_only = [s for s in snapshots if not is_alternate_snapshot(s["month"])]
     agg: Counter = Counter()
     prev_month_by: dict[str, str] = {}
-    for i in range(1, len(snapshots)):
-        prev, curr = snapshots[i - 1], snapshots[i]
+    for i in range(1, len(primary_only)):
+        prev, curr = primary_only[i - 1], primary_only[i]
         prev_lic = licenses_by_employee(prev["allocations"])
         curr_lic = licenses_by_employee(curr["allocations"])
         emp_dept = {

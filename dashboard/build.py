@@ -18,6 +18,7 @@ from pathlib import Path
 
 TOOLS = ["claude", "cursor", "chatgpt", "copilot", "gemini"]
 MONTH_RE = re.compile(r"^\d{4}-\d{2}$")
+STANDARDISED_RE = re.compile(r"^standardised(?:-(?P<suffix>[A-Za-z0-9][A-Za-z0-9_-]*))?$")
 
 TIER_ORDER = ["L3", "L2", "L1", "L0", "TBD"]
 TIER_KLASS = {  # CSS hooks for tier-coloured bars
@@ -295,8 +296,19 @@ def _filter_history(rows: list[dict], month: str) -> list[dict]:
     return [r for r in rows if r.get("month") == month]
 
 
+def snapshot_dir(root: Path, snapshot_id: str) -> Path:
+    """Resolve `2026-04` → `data/2026-04/standardised/`,
+    `2026-04-final` → `data/2026-04/standardised-final/`."""
+    if MONTH_RE.match(snapshot_id):
+        return root / snapshot_id / "standardised"
+    # Suffixed snapshot: first 7 chars are the YYYY-MM, rest after the hyphen
+    # is the standardised-* folder suffix.
+    month, suffix = snapshot_id[:7], snapshot_id[8:]
+    return root / month / f"standardised-{suffix}"
+
+
 def build(month: str, root: Path, history_dir: Path | None = None) -> str:
-    std = root / month / "standardised"
+    std = snapshot_dir(root, month)
     employees = read(std / "employees.csv")
     allocations = read(std / "license_allocations.csv")
     unmatched = read(std / "unmatched.csv")
@@ -380,8 +392,13 @@ def build(month: str, root: Path, history_dir: Path | None = None) -> str:
         pct = (ai / total * 100) if total else 0
         bu_rows.append((bu, total, ai, pct))
 
-    # Build markdown
-    snapshot_label = f"{month}-01"
+    # Build markdown. For suffixed snapshots (e.g. 2026-04-final), strip the
+    # suffix when forming the ISO date label so it reads as the calendar date
+    # of the period, not the snapshot ID.
+    base_month = month[:7] if not MONTH_RE.match(month) else month
+    suffix = month[8:] if not MONTH_RE.match(month) else ""
+    snapshot_label = f"{base_month}-01"
+    suffix_chip = f'  ·  <span class="snapshot-suffix">alt: {suffix}</span>' if suffix else ""
 
     md: list[str] = []
     md.append("---")
@@ -392,7 +409,7 @@ def build(month: str, root: Path, history_dir: Path | None = None) -> str:
     md.append("")
     md.append(
         f'<p class="doc-meta"><strong>Synthesis Software Technologies</strong>  ·  Technology Office  ·  '
-        f'Snapshot {snapshot_label}  ·  '
+        f'Snapshot {snapshot_label}{suffix_chip}  ·  '
         f'<a href="index.html">long-term trends →</a></p>'
     )
     md.append("")
@@ -743,11 +760,26 @@ def build(month: str, root: Path, history_dir: Path | None = None) -> str:
 
 
 def discover_months(data_root: Path) -> list[str]:
-    return sorted(
-        d.name for d in data_root.iterdir()
-        if d.is_dir() and MONTH_RE.match(d.name)
-        and (d / "standardised").is_dir()
-    )
+    """Return every snapshot ID under data_root, sorted.
+
+    A snapshot is any `standardised` or `standardised-<suffix>` folder under a
+    YYYY-MM month directory. `standardised/` → `2026-04`;
+    `standardised-final/` → `2026-04-final`. Alternate snapshots stand
+    alongside the primary one as separately selectable views.
+    """
+    out: list[str] = []
+    for month_dir in data_root.iterdir():
+        if not (month_dir.is_dir() and MONTH_RE.match(month_dir.name)):
+            continue
+        for child in month_dir.iterdir():
+            if not child.is_dir():
+                continue
+            m = STANDARDISED_RE.match(child.name)
+            if not m:
+                continue
+            suffix = m.group("suffix")
+            out.append(f"{month_dir.name}-{suffix}" if suffix else month_dir.name)
+    return sorted(out)
 
 
 def write_quarto_yml(months_newest_first: list[str], out: Path) -> None:
