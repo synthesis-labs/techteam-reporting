@@ -7,8 +7,8 @@ output-file: snapshot-2026-04
 <p class="doc-meta"><strong>Synthesis Software Technologies</strong>  ·  Technology Office  ·  Snapshot 2026-04-01  ·  <a href="index.html">long-term trends →</a></p>
 
 <div class="kpi-grid">
-<div class="kpi"><div class="kpi-value">72%</div><div class="kpi-label">License adoption</div><div class="kpi-sub">135 of 187 employees</div></div>
-<div class="kpi kpi-alert"><div class="kpi-value">52</div><div class="kpi-label">Employees with no tools</div><div class="kpi-sub">28% of org — priority activation</div></div>
+<div class="kpi"><div class="kpi-value">72%</div><div class="kpi-label">License adoption</div><div class="kpi-sub">134 of 187 employees</div></div>
+<div class="kpi kpi-alert"><div class="kpi-value">53</div><div class="kpi-label">Employees with no tools</div><div class="kpi-sub">28% of org — priority activation</div></div>
 <div class="kpi"><div class="kpi-value">0%</div><div class="kpi-label">Projects using AI</div><div class="kpi-sub">0 of 0 projects (0 active)</div></div>
 <div class="kpi"><div class="kpi-value">211</div><div class="kpi-label">Total license seats</div><div class="kpi-sub">across 5 tools</div></div>
 </div>
@@ -21,9 +21,9 @@ output-file: snapshot-2026-04
 <div class="insight insight-green"><span class="insight-icon">🟢</span><div><div class="insight-headline">2 BUs at 100% adoption</div><div class="insight-detail">Executive, Technology fully equipped.</div></div></div>
 <div class="insight insight-amber"><span class="insight-icon">🟡</span><div><div class="insight-headline">8 BUs at 50–79% adoption</div><div class="insight-detail">Capacity to close quickly with targeted activation.</div></div></div>
 <div class="insight insight-red"><span class="insight-icon">🔴</span><div><div class="insight-headline">2 BUs need activation</div><div class="insight-detail">2 below 50%.</div></div></div>
-<div class="insight insight-blue"><span class="insight-icon">🤖</span><div><div class="insight-headline">ChatGPT is most-used (47%)</div><div class="insight-detail">87 of 187 employees licensed. Niche tools (&lt;15%): Cursor, GitHub Copilot, Gemini.</div></div></div>
-<div class="insight insight-blue"><span class="insight-icon">📊</span><div><div class="insight-headline">72.2% overall — ahead of PS industry median (~55–60%)</div><div class="insight-detail">Licensed = at least one AI tool seat resolved to the employee.</div></div></div>
-<div class="insight insight-amber"><span class="insight-icon">🎯</span><div><div class="insight-headline">52 employees (28%) have zero tools</div><div class="insight-detail">Priority activation cohort for next month.</div></div></div>
+<div class="insight insight-blue"><span class="insight-icon">🤖</span><div><div class="insight-headline">ChatGPT is most-used (47%)</div><div class="insight-detail">87 of 187 employees licensed. Niche tools (&lt;15%): Cursor, Gemini, GitHub Copilot.</div></div></div>
+<div class="insight insight-blue"><span class="insight-icon">📊</span><div><div class="insight-headline">71.7% overall — ahead of PS industry median (~55–60%)</div><div class="insight-detail">Licensed = at least one AI tool seat resolved to the employee.</div></div></div>
+<div class="insight insight-amber"><span class="insight-icon">🎯</span><div><div class="insight-headline">53 employees (28%) have zero tools</div><div class="insight-detail">Priority activation cohort for next month.</div></div></div>
 </div>
 
 ## License allocation by tool
@@ -31,11 +31,13 @@ output-file: snapshot-2026-04
 <table class="adoption-table">
 <thead><tr><th>Tool</th><th>Licensed</th><th>% workforce</th><th>Prior month</th><th>Δ</th></tr></thead>
 <tbody>
+<tr><td>ChatGPT</td><td>87</td><td>46.5%</td><td>79</td><td><span class="delta-up">▲ 8</span></td></tr>
 <tr><td>Claude</td><td>71</td><td>38.0%</td><td>45</td><td><span class="delta-up">▲ 26</span></td></tr>
 <tr><td>Cursor</td><td>19</td><td>10.2%</td><td>18</td><td><span class="delta-up">▲ 1</span></td></tr>
-<tr><td>ChatGPT</td><td>87</td><td>46.5%</td><td>79</td><td><span class="delta-up">▲ 8</span></td></tr>
-<tr><td>GitHub Copilot</td><td>17</td><td>9.1%</td><td>15</td><td><span class="delta-up">▲ 2</span></td></tr>
 <tr><td>Gemini</td><td>17</td><td>9.1%</td><td>17</td><td><span class="delta-flat">±0</span></td></tr>
+<tr><td>GitHub Copilot</td><td>17</td><td>9.1%</td><td>15</td><td><span class="delta-up">▲ 2</span></td></tr>
+<tr><td>GitHub Copilot (new export)</td><td>0</td><td>0.0%</td><td>0</td><td><span class="delta-flat">±0</span></td></tr>
+<tr><td>Microsoft Copilot</td><td>0</td><td>0.0%</td><td>0</td><td><span class="delta-flat">±0</span></td></tr>
 </tbody></table>
 
 <p class="note">Counts reflect resolved licenses only — 26 unmatched rows are excluded (see Data quality below). Δ compares to the prior snapshot loaded into <code>data/history/</code>.</p>
@@ -47,10 +49,10 @@ output-file: snapshot-2026-04
 <tbody>
 <tr><td>Code</td><td>43</td><td>34</td><td><span class="pct-pill tier-good">79%</span></td></tr>
 <tr><td>RegTech</td><td>25</td><td>18</td><td><span class="pct-pill tier-good">72%</span></td></tr>
-<tr><td>Managed Operations</td><td>19</td><td>11</td><td><span class="pct-pill tier-fair">58%</span></td></tr>
+<tr><td>Managed Operations</td><td>19</td><td>12</td><td><span class="pct-pill tier-fair">63%</span></td></tr>
 <tr><td>Cloud</td><td>17</td><td>12</td><td><span class="pct-pill tier-good">71%</span></td></tr>
 <tr><td>Halo</td><td>16</td><td>11</td><td><span class="pct-pill tier-good">69%</span></td></tr>
-<tr><td>Intelligent Data</td><td>15</td><td>14</td><td><span class="pct-pill tier-excellent">93%</span></td></tr>
+<tr><td>Intelligent Data</td><td>15</td><td>12</td><td><span class="pct-pill tier-good">80%</span></td></tr>
 <tr><td>Business Enablement Operations</td><td>11</td><td>5</td><td><span class="pct-pill tier-fair">45%</span></td></tr>
 <tr><td>Sales</td><td>11</td><td>10</td><td><span class="pct-pill tier-excellent">91%</span></td></tr>
 <tr><td>Project Management Office</td><td>7</td><td>4</td><td><span class="pct-pill tier-fair">57%</span></td></tr>
@@ -90,7 +92,7 @@ output-file: snapshot-2026-04
 <p>Three concrete cohorts to action next month, derived from the data above. Numbers in <strong>bold</strong> are pulled from this snapshot; framings (PRIORITY / SCALE / AMPLIFY) mirror the ExCo report's §4.</p>
 
 <div class="theme-grid">
-<div class="theme-card theme-red"><div class="theme-header"><span class="theme-icon">🔴</span><span class="theme-badge">PRIORITY</span></div><div class="theme-title">Tool provisioning gap</div><ul class="theme-body"><li><strong>52</strong> total employees have zero AI tools.</li><li><strong>26</strong> unresolved license rows blocking accurate counts.</li></ul><div class="theme-divider">Recommended actions</div><ul class="theme-actions"><li>Provision Claude / ChatGPT licences for AI-active project teams this week.</li><li>Resolve outstanding unmatched handles via <code>aliases.csv</code>.</li><li>Establish a licence-request SLA (target: 48 hrs).</li></ul></div>
+<div class="theme-card theme-red"><div class="theme-header"><span class="theme-icon">🔴</span><span class="theme-badge">PRIORITY</span></div><div class="theme-title">Tool provisioning gap</div><ul class="theme-body"><li><strong>53</strong> total employees have zero AI tools.</li><li><strong>26</strong> unresolved license rows blocking accurate counts.</li></ul><div class="theme-divider">Recommended actions</div><ul class="theme-actions"><li>Provision Claude / ChatGPT licences for AI-active project teams this week.</li><li>Resolve outstanding unmatched handles via <code>aliases.csv</code>.</li><li>Establish a licence-request SLA (target: 48 hrs).</li></ul></div>
 <div class="theme-card theme-amber"><div class="theme-header"><span class="theme-icon">🟡</span><span class="theme-badge">SCALE</span></div><div class="theme-title">Move the L2 middle</div><ul class="theme-body"><li>Load AI Maturity Self-Assessment responses to size this cohort.</li></ul><div class="theme-divider">Recommended actions</div><ul class="theme-actions"><li>Launch an L2→L3 upskilling cohort using internal AI methodology.</li><li>Focus on the largest BUs first — biggest leverage per session.</li><li>Pair each cohort member with a daily AI workflow exercise.</li></ul></div>
 <div class="theme-card theme-green"><div class="theme-header"><span class="theme-icon">🟢</span><span class="theme-badge">AMPLIFY</span></div><div class="theme-title">L3 / L4 AI champions</div><ul class="theme-body"><li>Load AI Maturity Self-Assessment responses to identify champions.</li></ul><div class="theme-divider">Recommended actions</div><ul class="theme-actions"><li>Formalise an internal AI champions programme.</li><li>Pair champions with lagging BUs as embedded mentors.</li><li>Capture champion playbooks for reuse across the org.</li></ul></div>
 </div>
@@ -99,7 +101,7 @@ output-file: snapshot-2026-04
 
 <div class="dq-grid">
 <div class="dq-card"><div class="dq-value">26</div><div class="dq-label">Unmatched license rows</div><div class="dq-sub">Tool emails not found in master — needs alias resolution</div></div>
-<div class="dq-card"><div class="dq-value">0</div><div class="dq-label">Tools awaiting export</div><div class="dq-sub">ChatGPT, Copilot, Gemini — not yet loaded for this snapshot</div></div>
+<div class="dq-card"><div class="dq-value">2</div><div class="dq-label">Tools awaiting export</div><div class="dq-sub">GitHub Copilot (new export), Microsoft Copilot — not yet loaded for this snapshot</div></div>
 <div class="dq-card"><div class="dq-value">0</div><div class="dq-label">Assessment responses</div><div class="dq-sub">AI Maturity Self Assessment — not yet loaded</div></div>
 </div>
 

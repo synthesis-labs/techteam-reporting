@@ -16,7 +16,15 @@ from collections import Counter, defaultdict
 from pathlib import Path
 
 
-TOOLS = ["claude", "cursor", "chatgpt", "copilot", "gemini"]
+TOOLS = [
+    "chatgpt",
+    "claude",
+    "cursor",
+    "gemini",
+    "copilot",
+    "github_copilot",
+    "microsoft_copilot",
+]
 MONTH_RE = re.compile(r"^\d{4}-\d{2}$")
 STANDARDISED_RE = re.compile(r"^standardised(?:-(?P<suffix>[A-Za-z0-9][A-Za-z0-9_-]*))?$")
 
@@ -29,11 +37,13 @@ TIER_KLASS = {  # CSS hooks for tier-coloured bars
     "TBD": "tier-tbd",
 }
 TOOL_DISPLAY = {
+    "chatgpt": "ChatGPT",
     "claude": "Claude",
     "cursor": "Cursor",
-    "chatgpt": "ChatGPT",
-    "copilot": "GitHub Copilot",
     "gemini": "Gemini",
+    "copilot": "GitHub Copilot",
+    "github_copilot": "GitHub Copilot (new export)",
+    "microsoft_copilot": "Microsoft Copilot",
 }
 PRODUCTIVE_AI_TAGS = {
     "Research Mode",
@@ -48,6 +58,62 @@ def read(path: Path) -> list[dict]:
         return []
     with path.open(newline="", encoding="utf-8-sig") as f:
         return list(csv.DictReader(f))
+
+
+def _norm_email(value: str | None) -> str:
+    return (value or "").strip().lower()
+
+
+def _norm_code(value: str | None) -> str:
+    return (value or "").strip()
+
+
+def _employee_indexes(root: Path, employees: list[dict]) -> tuple[dict[str, dict], dict[str, str], set[str]]:
+    """Build employee indexes keyed by email, with optional master fallback.
+
+    Priority: current snapshot rows win on conflict; master fills gaps.
+    """
+    master_rows = read(root / "employees_master.csv")
+    employee_by_email: dict[str, dict] = {}
+    email_by_code: dict[str, str] = {}
+
+    for row in master_rows:
+        email = _norm_email(row.get("email"))
+        if not email:
+            continue
+        employee_by_email[email] = row
+        code = _norm_code(row.get("employee_code"))
+        if code and code not in email_by_code:
+            email_by_code[code] = email
+
+    current_emails: set[str] = set()
+    for row in employees:
+        email = _norm_email(row.get("email"))
+        if not email:
+            continue
+        current_emails.add(email)
+        employee_by_email[email] = row
+        code = _norm_code(row.get("employee_code"))
+        if code:
+            email_by_code[code] = email
+
+    return employee_by_email, email_by_code, current_emails
+
+
+def _allocation_email(row: dict, employee_by_email: dict[str, dict], email_by_code: dict[str, str]) -> str | None:
+    """Resolve an allocation row to canonical email.
+
+    Prefer source_email; fall back to employee_code lookup for legacy rows.
+    """
+    source_email = _norm_email(row.get("source_email"))
+    if source_email and source_email in employee_by_email:
+        return source_email
+
+    code = _norm_code(row.get("employee_code"))
+    if code and code in email_by_code:
+        return email_by_code[code]
+
+    return None
 
 
 def adoption_tier(pct: float) -> str:
@@ -327,13 +393,17 @@ def build(month: str, root: Path, history_dir: Path | None = None) -> str:
     alignment_history = _filter_history(read(hist / "assessment_alignment_by_month.csv"), month)
 
     total_employees = len(employees)
+    employee_by_email, email_by_code, current_emails = _employee_indexes(root, employees)
 
     # License adoption per employee
     licenses_by_employee: dict[str, set[str]] = defaultdict(set)
     for row in allocations:
-        if row.get("employee_code"):
-            licenses_by_employee[row["employee_code"]].add(row["tool"])
-    employees_with_license = len(licenses_by_employee)
+        email = _allocation_email(row, employee_by_email, email_by_code)
+        if email and row.get("tool"):
+            licenses_by_employee[email].add(row["tool"])
+
+    current_licensed = {email for email in licenses_by_employee if email in current_emails}
+    employees_with_license = len(current_licensed)
     license_adoption_pct = (employees_with_license / total_employees * 100) if total_employees else 0
 
     # Per-tool counts
@@ -349,12 +419,16 @@ def build(month: str, root: Path, history_dir: Path | None = None) -> str:
     dept_with_license: dict[str, set[str]] = defaultdict(set)
     emp_dept: dict[str, str] = {}
     for emp in employees:
-        dept = emp.get("department") or "(no department)"
+        dept = emp.get("business_unit") or emp.get("department") or "(no department)"
         dept_headcount[dept] += 1
-        emp_dept[emp["employee_code"]] = dept
-    for code, tools in licenses_by_employee.items():
-        if code in emp_dept:
-            dept_with_license[emp_dept[code]].add(code)
+        email = _norm_email(emp.get("email"))
+        if email:
+            emp_dept[email] = dept
+
+    for email in current_licensed:
+        dept = emp_dept.get(email)
+        if dept:
+            dept_with_license[dept].add(email)
 
     dept_rows = []
     for dept, head in sorted(dept_headcount.items(), key=lambda kv: -kv[1]):
@@ -738,10 +812,12 @@ def build(month: str, root: Path, history_dir: Path | None = None) -> str:
         f'<div class="dq-sub">Tool emails not found in master — needs alias resolution</div></div>'
     )
     pending_tools = sum(1 for t in TOOLS if t not in tool_counts)
+    missing_tools = [TOOL_DISPLAY[t] for t in TOOLS if t not in tool_counts]
+    missing_tools_label = ", ".join(missing_tools) if missing_tools else "None"
     md.append(
         f'<div class="dq-card"><div class="dq-value">{pending_tools}</div>'
         f'<div class="dq-label">Tools awaiting export</div>'
-        f'<div class="dq-sub">ChatGPT, Copilot, Gemini — not yet loaded for this snapshot</div></div>'
+        f'<div class="dq-sub">{missing_tools_label} — not yet loaded for this snapshot</div></div>'
     )
     md.append(
         f'<div class="dq-card"><div class="dq-value">{len(assessments)}</div>'

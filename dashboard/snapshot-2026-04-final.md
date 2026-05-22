@@ -21,7 +21,7 @@ output-file: snapshot-2026-04-final
 <div class="insight insight-green"><span class="insight-icon">🟢</span><div><div class="insight-headline">5 BUs at 100% adoption</div><div class="insight-detail">Sales, Finance, Product Incubation… fully equipped.</div></div></div>
 <div class="insight insight-amber"><span class="insight-icon">🟡</span><div><div class="insight-headline">11 BUs at 50–79% adoption</div><div class="insight-detail">Capacity to close quickly with targeted activation.</div></div></div>
 <div class="insight insight-red"><span class="insight-icon">🔴</span><div><div class="insight-headline">4 BUs need activation</div><div class="insight-detail">1 BUs at 0%: Marketing; 3 below 50%.</div></div></div>
-<div class="insight insight-blue"><span class="insight-icon">🤖</span><div><div class="insight-headline">ChatGPT is most-used (40%)</div><div class="insight-detail">90 of 227 employees licensed. Niche tools (&lt;15%): Cursor, GitHub Copilot, Gemini.</div></div></div>
+<div class="insight insight-blue"><span class="insight-icon">🤖</span><div><div class="insight-headline">ChatGPT is most-used (40%)</div><div class="insight-detail">90 of 227 employees licensed. Niche tools (&lt;15%): Cursor, Gemini, GitHub Copilot.</div></div></div>
 <div class="insight insight-blue"><span class="insight-icon">📊</span><div><div class="insight-headline">63.9% overall — ahead of PS industry median (~55–60%)</div><div class="insight-detail">Licensed = at least one AI tool seat resolved to the employee.</div></div></div>
 <div class="insight insight-amber"><span class="insight-icon">🎯</span><div><div class="insight-headline">82 employees (36%) have zero tools</div><div class="insight-detail">Priority activation cohort for next month.</div></div></div>
 </div>
@@ -31,11 +31,13 @@ output-file: snapshot-2026-04-final
 <table class="adoption-table">
 <thead><tr><th>Tool</th><th>Licensed</th><th>% workforce</th><th>Prior month</th><th>Δ</th></tr></thead>
 <tbody>
+<tr><td>ChatGPT</td><td>90</td><td>39.6%</td><td>87</td><td><span class="delta-up">▲ 3</span></td></tr>
 <tr><td>Claude</td><td>81</td><td>35.7%</td><td>71</td><td><span class="delta-up">▲ 10</span></td></tr>
 <tr><td>Cursor</td><td>20</td><td>8.8%</td><td>19</td><td><span class="delta-up">▲ 1</span></td></tr>
-<tr><td>ChatGPT</td><td>90</td><td>39.6%</td><td>87</td><td><span class="delta-up">▲ 3</span></td></tr>
-<tr><td>GitHub Copilot</td><td>15</td><td>6.6%</td><td>17</td><td><span class="delta-down">▼ 2</span></td></tr>
 <tr><td>Gemini</td><td>20</td><td>8.8%</td><td>17</td><td><span class="delta-up">▲ 3</span></td></tr>
+<tr><td>GitHub Copilot</td><td>15</td><td>6.6%</td><td>17</td><td><span class="delta-down">▼ 2</span></td></tr>
+<tr><td>GitHub Copilot (new export)</td><td>0</td><td>0.0%</td><td>0</td><td><span class="delta-flat">±0</span></td></tr>
+<tr><td>Microsoft Copilot</td><td>0</td><td>0.0%</td><td>0</td><td><span class="delta-flat">±0</span></td></tr>
 </tbody></table>
 
 <p class="note">Counts reflect resolved licenses only — 2 unmatched rows are excluded (see Data quality below). Δ compares to the prior snapshot loaded into <code>data/history/</code>.</p>
@@ -105,7 +107,7 @@ output-file: snapshot-2026-04-final
 
 <div class="dq-grid">
 <div class="dq-card"><div class="dq-value">2</div><div class="dq-label">Unmatched license rows</div><div class="dq-sub">Tool emails not found in master — needs alias resolution</div></div>
-<div class="dq-card"><div class="dq-value">0</div><div class="dq-label">Tools awaiting export</div><div class="dq-sub">ChatGPT, Copilot, Gemini — not yet loaded for this snapshot</div></div>
+<div class="dq-card"><div class="dq-value">2</div><div class="dq-label">Tools awaiting export</div><div class="dq-sub">GitHub Copilot (new export), Microsoft Copilot — not yet loaded for this snapshot</div></div>
 <div class="dq-card"><div class="dq-value">0</div><div class="dq-label">Assessment responses</div><div class="dq-sub">AI Maturity Self Assessment — not yet loaded</div></div>
 </div>
 

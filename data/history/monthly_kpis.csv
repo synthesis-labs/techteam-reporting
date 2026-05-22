@@ -1,5 +1,5 @@
 month,snapshot_date,total_employees,employees_with_license,employees_no_tools,license_adoption_pct,no_tools_pct,total_license_seats,tools_active,total_projects,active_projects,projects_using_ai,project_ai_pct,unmatched_count,assessment_responses
 2026-03,2026-03-01,187,114,73,60.96,39.04,174,5,0,0,0,0,26,0
-2026-04,2026-04-01,187,135,52,72.19,27.81,211,5,0,0,0,0,26,0
+2026-04,2026-04-01,187,134,53,71.66,28.34,211,5,0,0,0,0,26,0
 2026-04-final,2026-04-01,227,145,82,63.88,36.12,226,5,0,0,0,0,2,0
 2026-05,2026-05-01,192,143,49,74.48,25.52,218,5,43,43,22,51.16,34,101

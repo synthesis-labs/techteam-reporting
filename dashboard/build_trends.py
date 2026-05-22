@@ -18,19 +18,31 @@ import plotly.graph_objects as go
 
 
 TOOL_COLOR = {
+    "chatgpt": "#198754",
     "claude": "#D97706",
     "cursor": "#0D6EFD",
-    "chatgpt": "#198754",
-    "copilot": "#495057",
     "gemini": "#8B44AC",
+    "copilot": "#495057",
+    "github_copilot": "#111827",
+    "microsoft_copilot": "#0EA5E9",
 }
-TOOL_ORDER = ["claude", "cursor", "chatgpt", "copilot", "gemini"]
+TOOL_ORDER = [
+    "chatgpt",
+    "claude",
+    "cursor",
+    "gemini",
+    "copilot",
+    "github_copilot",
+    "microsoft_copilot",
+]
 TOOL_LABEL = {
+    "chatgpt": "ChatGPT",
     "claude": "Claude",
     "cursor": "Cursor",
-    "chatgpt": "ChatGPT",
-    "copilot": "Copilot",
     "gemini": "Gemini",
+    "copilot": "Copilot (legacy)",
+    "github_copilot": "GitHub Copilot",
+    "microsoft_copilot": "Microsoft Copilot",
 }
 PRODUCTIVE_TAG_COLOR = "#16a34a"
 OTHER_TAG_COLOR = "#94a3b8"

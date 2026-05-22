@@ -17,7 +17,15 @@ from collections import Counter, defaultdict
 from pathlib import Path
 
 
-TOOLS = ["claude", "cursor", "chatgpt", "copilot", "gemini"]
+TOOLS = [
+    "chatgpt",
+    "claude",
+    "cursor",
+    "gemini",
+    "copilot",
+    "github_copilot",
+    "microsoft_copilot",
+]
 PRODUCTIVE_AI_TAGS = {
     "Research Mode",
     "AI for Development",
@@ -94,6 +102,57 @@ def read(path: Path) -> list[dict]:
         return list(csv.DictReader(f))
 
 
+def norm_email(value: str | None) -> str:
+    return (value or "").strip().lower()
+
+
+def norm_code(value: str | None) -> str:
+    return (value or "").strip()
+
+
+def employee_indexes(snapshot: dict) -> tuple[dict[str, dict], dict[str, str], set[str]]:
+    """Build employee indexes keyed by email, with master fallback.
+
+    Current snapshot rows override master rows on conflict.
+    """
+    by_email: dict[str, dict] = {}
+    email_by_code: dict[str, str] = {}
+
+    for row in snapshot.get("employees_master", []):
+        email = norm_email(row.get("email"))
+        if not email:
+            continue
+        by_email[email] = row
+        code = norm_code(row.get("employee_code"))
+        if code and code not in email_by_code:
+            email_by_code[code] = email
+
+    current_emails: set[str] = set()
+    for row in snapshot.get("employees", []):
+        email = norm_email(row.get("email"))
+        if not email:
+            continue
+        current_emails.add(email)
+        by_email[email] = row
+        code = norm_code(row.get("employee_code"))
+        if code:
+            email_by_code[code] = email
+
+    return by_email, email_by_code, current_emails
+
+
+def allocation_email(row: dict, by_email: dict[str, dict], email_by_code: dict[str, str]) -> str | None:
+    source_email = norm_email(row.get("source_email"))
+    if source_email and source_email in by_email:
+        return source_email
+
+    code = norm_code(row.get("employee_code"))
+    if code and code in email_by_code:
+        return email_by_code[code]
+
+    return None
+
+
 def write(path: Path, rows: list[dict], fieldnames: list[str]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     with path.open("w", newline="", encoding="utf-8") as f:
@@ -166,22 +225,36 @@ def load_month(data_root: Path, snapshot_id_: str) -> dict:
     raise FileNotFoundError(f"No snapshot {snapshot_id_!r} under {data_root}")
 
 
-def licenses_by_employee(allocations: list[dict]) -> dict[str, set[str]]:
+def licenses_by_employee(snapshot: dict) -> dict[str, set[str]]:
     out: dict[str, set[str]] = defaultdict(set)
-    for row in allocations:
-        if row.get("employee_code"):
-            out[row["employee_code"]].add(row["tool"])
+    by_email, email_by_code, _ = employee_indexes(snapshot)
+    for row in snapshot["allocations"]:
+        email = allocation_email(row, by_email, email_by_code)
+        if email and row.get("tool"):
+            out[email].add(row["tool"])
     return out
+
+
+def resolved_tool_counts(snapshot: dict) -> Counter:
+    by_email, email_by_code, _ = employee_indexes(snapshot)
+    counts: Counter = Counter()
+    for row in snapshot["allocations"]:
+        email = allocation_email(row, by_email, email_by_code)
+        tool = row.get("tool")
+        if email and tool:
+            counts[tool] += 1
+    return counts
 
 
 def monthly_kpis(snapshots: list[dict]) -> list[dict]:
     rows = []
     for s in snapshots:
         total_emp = len(s["employees"])
-        lbe = licenses_by_employee(s["allocations"])
-        with_lic = len(lbe)
+        _, _, current_emails = employee_indexes(s)
+        lbe = licenses_by_employee(s)
+        with_lic = len({email for email in lbe if email in current_emails})
         no_tools = total_emp - with_lic
-        tool_counts = Counter(r["tool"] for r in s["allocations"] if r.get("employee_code"))
+        tool_counts = resolved_tool_counts(s)
 
         project_tags: dict[str, set[str]] = defaultdict(set)
         for r in s["ai_usage"]:
@@ -223,9 +296,7 @@ def tool_adoption_by_month(snapshots: list[dict]) -> list[dict]:
     prev_seats: dict[str, int] = {}
     for s in snapshots:
         total_emp = len(s["employees"])
-        tool_counts = Counter(
-            r["tool"] for r in s["allocations"] if r.get("employee_code")
-        )
+        tool_counts = resolved_tool_counts(s)
         alt = is_alternate_snapshot(s["month"])
         for tool in TOOLS:
             seats = tool_counts.get(tool, 0)
@@ -316,15 +387,17 @@ def dept_adoption_by_month(snapshots: list[dict]) -> list[dict]:
         dept_head: Counter = Counter()
         emp_dept: dict[str, str] = {}
         for emp in s["employees"]:
-            dept = emp.get("department") or "(no department)"
+            dept = emp.get("business_unit") or emp.get("department") or "(no department)"
             dept_head[dept] += 1
-            emp_dept[emp["employee_code"]] = dept
+            email = norm_email(emp.get("email"))
+            if email:
+                emp_dept[email] = dept
 
-        lbe = licenses_by_employee(s["allocations"])
+        lbe = licenses_by_employee(s)
         dept_with: dict[str, set[str]] = defaultdict(set)
-        for code in lbe:
-            if code in emp_dept:
-                dept_with[emp_dept[code]].add(code)
+        for email in lbe:
+            if email in emp_dept:
+                dept_with[emp_dept[email]].add(email)
 
         for dept, head in dept_head.items():
             with_lic = len(dept_with.get(dept, set()))
@@ -393,19 +466,20 @@ def license_churn(snapshots: list[dict]) -> list[dict]:
     prev_month_by: dict[str, str] = {}
     for i in range(1, len(primary_only)):
         prev, curr = primary_only[i - 1], primary_only[i]
-        prev_lic = licenses_by_employee(prev["allocations"])
-        curr_lic = licenses_by_employee(curr["allocations"])
+        prev_lic = licenses_by_employee(prev)
+        curr_lic = licenses_by_employee(curr)
+        curr_by_email, _, _ = employee_indexes(curr)
         emp_dept = {
-            e["employee_code"]: e.get("department") or "(no department)"
-            for e in curr["employees"]
+            email: (e.get("business_unit") or e.get("department") or "(no department)")
+            for email, e in curr_by_email.items()
         }
         prev_month_by[curr["month"]] = prev["month"]
 
-        codes = set(prev_lic) | set(curr_lic)
-        for code in codes:
-            prev_tools = prev_lic.get(code, set())
-            curr_tools = curr_lic.get(code, set())
-            dept = emp_dept.get(code, "(no department)")
+        emails = set(prev_lic) | set(curr_lic)
+        for email in emails:
+            prev_tools = prev_lic.get(email, set())
+            curr_tools = curr_lic.get(email, set())
+            dept = emp_dept.get(email, "(no department)")
             for tool in prev_tools | curr_tools:
                 in_prev = tool in prev_tools
                 in_curr = tool in curr_tools
@@ -477,11 +551,16 @@ def assessment_alignment_by_month(snapshots: list[dict]) -> list[dict]:
     for s in snapshots:
         if not s["assessments"]:
             continue
-        lbe = licenses_by_employee(s["allocations"])
-        assess_by_code = {
-            r["employee_code"]: r for r in s["assessments"] if r.get("employee_code")
-        }
-        all_codes = {e["employee_code"] for e in s["employees"]}
+        _, email_by_code, current_emails = employee_indexes(s)
+        lbe = licenses_by_employee(s)
+        assess_by_email: dict[str, dict] = {}
+        for r in s["assessments"]:
+            email = norm_email(r.get("email"))
+            if not email:
+                code = norm_code(r.get("employee_code"))
+                email = email_by_code.get(code, "")
+            if email:
+                assess_by_email[email] = r
 
         aligned = 0          # L2+ AND has tools
         add_tools = 0        # L2 AND has tools (subset of aligned; surfaced separately)
@@ -492,9 +571,9 @@ def assessment_alignment_by_month(snapshots: list[dict]) -> list[dict]:
         assess_no_tools = 0  # has assessment, no tools, L<3
         no_signal = 0        # neither tool nor assessment
 
-        for code in all_codes:
-            has_tools = code in lbe
-            assess = assess_by_code.get(code)
+        for email in current_emails:
+            has_tools = email in lbe
+            assess = assess_by_email.get(email)
             level = _level_int(assess.get("self_level", "")) if assess else None
 
             if assess and level is not None:
@@ -553,11 +632,14 @@ def assessments_by_dept_by_month(snapshots: list[dict]) -> list[dict]:
     for s in snapshots:
         if not s["assessments"]:
             continue
-        emp_by_code = {e["employee_code"]: e for e in s["employees"]}
+        by_email, email_by_code, _ = employee_indexes(s)
         dept_responses: dict[str, list[dict]] = defaultdict(list)
         for r in s["assessments"]:
-            emp = emp_by_code.get(r.get("employee_code", ""))
-            dept = (emp.get("department") if emp else "") or "(no department)"
+            email = norm_email(r.get("email"))
+            if not email:
+                email = email_by_code.get(norm_code(r.get("employee_code")), "")
+            emp = by_email.get(email)
+            dept = (emp.get("business_unit") if emp else "") or (emp.get("department") if emp else "") or "(no department)"
             dept_responses[dept].append({**r, "_dept": dept, "_emp": emp})
 
         for dept, resps in dept_responses.items():
@@ -614,7 +696,10 @@ def main() -> None:
     if not months:
         raise SystemExit(f"No YYYY-MM snapshots found under {data_root}")
 
+    master_rows = read(data_root / "employees_master.csv")
     snapshots = [load_month(data_root, m) for m in months]
+    for s in snapshots:
+        s["employees_master"] = master_rows
     print(f"Aggregating {len(months)} month(s): {', '.join(months)}")
 
     tables = {

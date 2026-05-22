@@ -13,16 +13,15 @@ month,prev_month,change_type,tool,department,count
 2026-04,2026-03,new,chatgpt,Code,2
 2026-04,2026-03,new,chatgpt,Cryptography,1
 2026-04,2026-03,new,chatgpt,Halo,1
-2026-04,2026-03,new,chatgpt,Intelligent Data,1
-2026-04,2026-03,new,chatgpt,Managed Operations,2
+2026-04,2026-03,new,chatgpt,Managed Operations,3
 2026-04,2026-03,new,chatgpt,RegTech,4
 2026-04,2026-03,new,chatgpt,Sales,2
 2026-04,2026-03,new,claude,Business Enablement Operations,1
 2026-04,2026-03,new,claude,Cloud,3
 2026-04,2026-03,new,claude,Code,10
 2026-04,2026-03,new,claude,Halo,1
-2026-04,2026-03,new,claude,Intelligent Data,3
-2026-04,2026-03,new,claude,Managed Operations,1
+2026-04,2026-03,new,claude,Intelligent Data,2
+2026-04,2026-03,new,claude,Managed Operations,2
 2026-04,2026-03,new,claude,RegTech,8
 2026-04,2026-03,new,claude,Sales,1
 2026-04,2026-03,new,copilot,RegTech,2
@@ -72,18 +71,19 @@ month,prev_month,change_type,tool,department,count
 2026-04,2026-03,retained,gemini,Intelligent Data,4
 2026-04,2026-03,retained,gemini,Managed Operations,1
 2026-04,2026-03,retained,gemini,Sales,1
-2026-05,2026-04,lost,chatgpt,(no department),2
+2026-05,2026-04,lost,chatgpt,(no department),3
 2026-05,2026-04,lost,chatgpt,Cloud,1
 2026-05,2026-04,lost,chatgpt,RegTech,2
-2026-05,2026-04,lost,claude,(no department),2
+2026-05,2026-04,lost,claude,(no department),3
 2026-05,2026-04,lost,copilot,(no department),1
 2026-05,2026-04,lost,copilot,Cloud,2
+2026-05,2026-04,new,chatgpt,Intelligent Data,1
 2026-05,2026-04,new,claude,Business Enablement Operations,1
 2026-05,2026-04,new,claude,Cloud,1
 2026-05,2026-04,new,claude,Code,4
 2026-05,2026-04,new,claude,Executive,1
 2026-05,2026-04,new,claude,Halo,1
-2026-05,2026-04,new,claude,Intelligent Data,3
+2026-05,2026-04,new,claude,Intelligent Data,4
 2026-05,2026-04,new,claude,Managed Operations,2
 2026-05,2026-04,new,claude,Project Management Office,1
 2026-05,2026-04,new,claude,RegTech,3
@@ -95,7 +95,7 @@ month,prev_month,change_type,tool,department,count
 2026-05,2026-04,retained,chatgpt,Finance,3
 2026-05,2026-04,retained,chatgpt,Halo,8
 2026-05,2026-04,retained,chatgpt,Human Resources,1
-2026-05,2026-04,retained,chatgpt,Intelligent Data,7
+2026-05,2026-04,retained,chatgpt,Intelligent Data,6
 2026-05,2026-04,retained,chatgpt,Managed Operations,10
 2026-05,2026-04,retained,chatgpt,Payments,1
 2026-05,2026-04,retained,chatgpt,Product,1
@@ -109,7 +109,7 @@ month,prev_month,change_type,tool,department,count
 2026-05,2026-04,retained,claude,Code,17
 2026-05,2026-04,retained,claude,Executive,4
 2026-05,2026-04,retained,claude,Halo,6
-2026-05,2026-04,retained,claude,Intelligent Data,7
+2026-05,2026-04,retained,claude,Intelligent Data,6
 2026-05,2026-04,retained,claude,Managed Operations,3
 2026-05,2026-04,retained,claude,Payments,3
 2026-05,2026-04,retained,claude,Project Management Office,3
