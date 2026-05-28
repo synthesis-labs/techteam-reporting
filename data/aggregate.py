@@ -644,6 +644,7 @@ def assessments_by_dept_by_month(snapshots: list[dict]) -> list[dict]:
 
         for dept, resps in dept_responses.items():
             level_counts: Counter = Counter()
+            parsed_level_counts: Counter = Counter()
             level_sum = 0.0
             level_n = 0
             devs = 0
@@ -651,11 +652,11 @@ def assessments_by_dept_by_month(snapshots: list[dict]) -> list[dict]:
             for r in resps:
                 lvl_raw = (r.get("self_level") or "").strip()
                 level_counts[lvl_raw or "(no response)"] += 1
-                # Try to parse numeric level (e.g. "Level 2" → 2, "2" → 2)
-                m = re.search(r"\d+", lvl_raw)
-                if m:
-                    level_sum += int(m.group(0))
+                lvl = _level_int(lvl_raw)
+                if lvl is not None:
+                    level_sum += lvl
                     level_n += 1
+                    parsed_level_counts[lvl] += 1
                 if _is_developer((r.get("_emp") or {}).get("job_title", "")):
                     devs += 1
                 else:
@@ -669,8 +670,8 @@ def assessments_by_dept_by_month(snapshots: list[dict]) -> list[dict]:
                 "non_developers": non_devs,
                 "avg_level": round(level_sum / level_n, 2) if level_n else "",
             }
-            for lvl in ("Level 0", "Level 1", "Level 2", "Level 3", "Level 4"):
-                row[lvl.replace(" ", "_").lower()] = level_counts.get(lvl, 0)
+            for lvl in range(5):
+                row[f"level_{lvl}"] = parsed_level_counts.get(lvl, 0)
             rows.append(row)
     return rows
 

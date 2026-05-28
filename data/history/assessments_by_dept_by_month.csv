@@ -1,16 +1,16 @@
 month,department,responses,developers,non_developers,avg_level,level_0,level_1,level_2,level_3,level_4
-2026-05,Technology,2,2,0,4.0,0,0,0,0,0
-2026-05,(no department),15,0,15,2.33,0,0,0,0,0
-2026-05,Managed Operations,4,2,2,2.5,0,0,0,0,0
-2026-05,Cloud,9,2,7,2.33,0,0,0,0,0
-2026-05,Business Enablement Operations,5,0,5,2.4,0,0,0,0,0
-2026-05,Code,21,12,9,2.1,0,0,0,0,0
-2026-05,Intelligent Data,8,6,2,2.25,0,0,0,0,0
-2026-05,RegTech,16,11,5,2.44,0,0,0,0,0
-2026-05,Halo,3,2,1,2.0,0,0,0,0,0
-2026-05,Payments,6,3,3,2.17,0,0,0,0,0
-2026-05,Project Management Office,5,0,5,2.2,0,0,0,0,0
-2026-05,Product,1,1,0,2.0,0,0,0,0,0
-2026-05,Sales,4,0,4,1.75,0,0,0,0,0
-2026-05,Product Incubation,1,0,1,3.0,0,0,0,0,0
-2026-05,Cryptography,1,1,0,3.0,0,0,0,0,0
+2026-05,Technology,2,2,0,4.0,0,0,0,0,2
+2026-05,(no department),15,0,15,2.33,0,1,9,4,1
+2026-05,Managed Operations,4,2,2,2.5,0,0,3,0,1
+2026-05,Cloud,9,2,7,2.33,0,1,5,2,1
+2026-05,Business Enablement Operations,5,0,5,2.4,0,0,3,2,0
+2026-05,Code,21,12,9,2.1,1,0,16,4,0
+2026-05,Intelligent Data,8,6,2,2.25,0,0,6,2,0
+2026-05,RegTech,16,11,5,2.44,0,0,10,5,1
+2026-05,Halo,3,2,1,2.0,0,0,3,0,0
+2026-05,Payments,6,3,3,2.17,0,0,5,1,0
+2026-05,Project Management Office,5,0,5,2.2,0,0,4,1,0
+2026-05,Product,1,1,0,2.0,0,0,1,0,0
+2026-05,Sales,4,0,4,1.75,0,1,3,0,0
+2026-05,Product Incubation,1,0,1,3.0,0,0,0,1,0
+2026-05,Cryptography,1,1,0,3.0,0,0,0,1,0

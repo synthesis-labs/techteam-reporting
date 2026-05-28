@@ -13,6 +13,7 @@ import argparse
 import csv
 from collections import defaultdict
 from pathlib import Path
+import re
 
 import plotly.graph_objects as go
 
@@ -47,6 +48,7 @@ TOOL_LABEL = {
 PRODUCTIVE_TAG_COLOR = "#16a34a"
 OTHER_TAG_COLOR = "#94a3b8"
 CHANGE_COLOR = {"new": "#16a34a", "lost": "#dc2626", "retained": "#0F3460"}
+MONTH_RE = re.compile(r"^\d{4}-\d{2}$")
 
 
 BASE_LAYOUT = dict(
@@ -90,6 +92,24 @@ def latest_kpis(kpis: list[dict]) -> dict:
 
 def prior_kpis(kpis: list[dict]) -> dict | None:
     return kpis[-2] if len(kpis) >= 2 else None
+
+
+def is_primary_snapshot(snapshot_id: str) -> bool:
+    return bool(MONTH_RE.match(snapshot_id or ""))
+
+
+def prior_primary_kpis(kpis: list[dict]) -> dict | None:
+    """Prior KPI row from the previous primary (YYYY-MM) snapshot.
+
+    Alternate snapshots like YYYY-MM-final are useful trend points, but
+    headline deltas should compare current month against the prior month.
+    """
+    if len(kpis) < 2:
+        return None
+    for row in reversed(kpis[:-1]):
+        if is_primary_snapshot(row.get("month", "")):
+            return row
+    return prior_kpis(kpis)
 
 
 def kpi_card(value: str, label: str, sub: str) -> str:
@@ -440,7 +460,7 @@ def build(history_dir: Path) -> str:
     months = [k["month"] for k in kpis]
     n_months = len(months)
     curr = latest_kpis(kpis)
-    prev = prior_kpis(kpis)
+    prev = prior_primary_kpis(kpis)
 
     md: list[str] = []
     md.append("---")
@@ -519,6 +539,28 @@ def build(history_dir: Path) -> str:
     )
     md.append(render(fig_dept_heatmap(dept_rows), "chart-dept"))
     md.append("")
+
+    if dept_rows:
+        latest_month = curr["month"]
+        latest_depts = [r for r in dept_rows if r["month"] == latest_month]
+        if latest_depts:
+            md.append(f"### Latest snapshot ({latest_month}) — license coverage by department")
+            md.append("")
+            md.append('<table class="adoption-table">')
+            md.append(
+                "<thead><tr><th>Department</th><th>Headcount</th>"
+                "<th>With license</th><th>Adoption %</th></tr></thead>"
+            )
+            md.append("<tbody>")
+            for r in sorted(latest_depts, key=lambda r: -int(r.get("headcount", 0) or 0)):
+                md.append(
+                    f'<tr><td>{r["department"]}</td>'
+                    f'<td>{r["headcount"]}</td>'
+                    f'<td>{r["with_license"]}</td>'
+                    f'<td>{float(r.get("adoption_pct") or 0):.1f}%</td></tr>'
+                )
+            md.append("</tbody></table>")
+            md.append("")
 
     md.append("## Project AI maturity by tier")
     md.append("")
