@@ -902,6 +902,18 @@ def write_quarto_yml(months_newest_first: list[str], out: Path) -> None:
     out.write_text("\n".join(lines) + "\n", encoding="utf-8")
 
 
+def remove_stale_snapshot_pages(dashboard_dir: Path, active_months: list[str]) -> list[Path]:
+    """Delete snapshot-*.md pages that no longer have backing data folders."""
+    keep = {f"snapshot-{m}.md" for m in active_months}
+    removed: list[Path] = []
+    for path in dashboard_dir.glob("snapshot-*.md"):
+        if path.name in keep:
+            continue
+        path.unlink(missing_ok=True)
+        removed.append(path)
+    return sorted(removed)
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
@@ -939,6 +951,9 @@ def main() -> None:
     # Regenerate _quarto.yml only when doing a full build. (A single-month
     # build is for one-off testing and shouldn't change the sidebar.)
     if not args.month:
+        removed = remove_stale_snapshot_pages(dashboard_dir, months)
+        for path in removed:
+            print(f"  removed stale {path}")
         write_quarto_yml(sorted(months, reverse=True), dashboard_dir / "_quarto.yml")
         print(f"  wrote {dashboard_dir / '_quarto.yml'}")
 

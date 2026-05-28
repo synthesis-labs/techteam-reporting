@@ -136,21 +136,21 @@ output-file: snapshot-2026-05
 <table class="adoption-table">
 <thead><tr><th>Department</th><th>Responses</th><th>Avg level</th><th>Developers</th><th>L0</th><th>L1</th><th>L2</th><th>L3</th><th>L4</th></tr></thead>
 <tbody>
-<tr><td>Code</td><td>21</td><td>2.1</td><td>12/21</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
-<tr><td>RegTech</td><td>16</td><td>2.44</td><td>11/16</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
-<tr><td>(no department)</td><td>15</td><td>2.33</td><td>0/15</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
-<tr><td>Cloud</td><td>9</td><td>2.33</td><td>2/9</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
-<tr><td>Intelligent Data</td><td>8</td><td>2.25</td><td>6/8</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
-<tr><td>Payments</td><td>6</td><td>2.17</td><td>3/6</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
-<tr><td>Business Enablement Operations</td><td>5</td><td>2.4</td><td>0/5</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
-<tr><td>Project Management Office</td><td>5</td><td>2.2</td><td>0/5</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
-<tr><td>Managed Operations</td><td>4</td><td>2.5</td><td>2/4</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
-<tr><td>Sales</td><td>4</td><td>1.75</td><td>0/4</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
-<tr><td>Halo</td><td>3</td><td>2.0</td><td>2/3</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
-<tr><td>Technology</td><td>2</td><td>4.0</td><td>2/2</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
-<tr><td>Product</td><td>1</td><td>2.0</td><td>1/1</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
-<tr><td>Product Incubation</td><td>1</td><td>3.0</td><td>0/1</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
-<tr><td>Cryptography</td><td>1</td><td>3.0</td><td>1/1</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+<tr><td>Code</td><td>21</td><td>2.1</td><td>12/21</td><td>1</td><td>0</td><td>16</td><td>4</td><td>0</td></tr>
+<tr><td>RegTech</td><td>16</td><td>2.44</td><td>11/16</td><td>0</td><td>0</td><td>10</td><td>5</td><td>1</td></tr>
+<tr><td>(no department)</td><td>15</td><td>2.33</td><td>0/15</td><td>0</td><td>1</td><td>9</td><td>4</td><td>1</td></tr>
+<tr><td>Cloud</td><td>9</td><td>2.33</td><td>2/9</td><td>0</td><td>1</td><td>5</td><td>2</td><td>1</td></tr>
+<tr><td>Intelligent Data</td><td>8</td><td>2.25</td><td>6/8</td><td>0</td><td>0</td><td>6</td><td>2</td><td>0</td></tr>
+<tr><td>Payments</td><td>6</td><td>2.17</td><td>3/6</td><td>0</td><td>0</td><td>5</td><td>1</td><td>0</td></tr>
+<tr><td>Business Enablement Operations</td><td>5</td><td>2.4</td><td>0/5</td><td>0</td><td>0</td><td>3</td><td>2</td><td>0</td></tr>
+<tr><td>Project Management Office</td><td>5</td><td>2.2</td><td>0/5</td><td>0</td><td>0</td><td>4</td><td>1</td><td>0</td></tr>
+<tr><td>Managed Operations</td><td>4</td><td>2.5</td><td>2/4</td><td>0</td><td>0</td><td>3</td><td>0</td><td>1</td></tr>
+<tr><td>Sales</td><td>4</td><td>1.75</td><td>0/4</td><td>0</td><td>1</td><td>3</td><td>0</td><td>0</td></tr>
+<tr><td>Halo</td><td>3</td><td>2.0</td><td>2/3</td><td>0</td><td>0</td><td>3</td><td>0</td><td>0</td></tr>
+<tr><td>Technology</td><td>2</td><td>4.0</td><td>2/2</td><td>0</td><td>0</td><td>0</td><td>0</td><td>2</td></tr>
+<tr><td>Product</td><td>1</td><td>2.0</td><td>1/1</td><td>0</td><td>0</td><td>1</td><td>0</td><td>0</td></tr>
+<tr><td>Product Incubation</td><td>1</td><td>3.0</td><td>0/1</td><td>0</td><td>0</td><td>0</td><td>1</td><td>0</td></tr>
+<tr><td>Cryptography</td><td>1</td><td>3.0</td><td>1/1</td><td>0</td><td>0</td><td>0</td><td>1</td><td>0</td></tr>
 </tbody></table>
 
 ## Strategic themes — next month

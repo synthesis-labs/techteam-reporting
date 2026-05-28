@@ -36,8 +36,21 @@ jobs:
           # Private repo layout mirrors what data/ would contain:
           #   <YYYY-MM>/raw/, <YYYY-MM>/standardised/, aliases.csv
           shopt -s nullglob
+          mkdir -p data
+
+          # Remove local month folders that are no longer in the private repo.
+          for d in data/[0-9][0-9][0-9][0-9]-[0-9][0-9]; do
+            [ -d "$d" ] || continue
+            m="$(basename "$d")"
+            if [ ! -d "_data_private/$m" ]; then
+              rm -rf "$d"
+            fi
+          done
+
           for d in _data_private/[0-9][0-9][0-9][0-9]-[0-9][0-9]; do
-            cp -R "$d" data/
+            m="$(basename "$d")"
+            mkdir -p "data/$m"
+            rsync -a --delete "$d/" "data/$m/"
           done
           if [ -f _data_private/aliases.csv ]; then
             cp _data_private/aliases.csv data/aliases.csv
@@ -75,4 +88,4 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./dist/dashboard
           destination_dir: dashboard
-          keep_files: true
+          keep_files: false
