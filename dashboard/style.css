@@ -104,6 +104,7 @@ main.content {
 .dept-mode-option {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 0.35rem;
   border: 1px solid #cbd5e1;
   border-radius: 999px;
@@ -113,6 +114,8 @@ main.content {
   color: #334155;
   font-size: 0.73rem;
   font-weight: 600;
+  line-height: 1;
+  white-space: nowrap;
   cursor: pointer;
 }
 
@@ -134,18 +137,13 @@ main.content {
 
 .dept-filter > summary {
   list-style: none;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.45rem;
-  min-height: 32px;
-  box-sizing: border-box;
-  padding: 0.22rem 0.62rem;
-  border: 1px solid #cbd5e1;
-  border-radius: 999px;
-  background: #ffffff;
-  color: #1f2937;
   cursor: pointer;
   user-select: none;
+}
+
+.dept-filter-summary {
+  gap: 0.45rem;
+  padding: 0.22rem 0.62rem;
 }
 
 .dept-filter > summary::-webkit-details-marker {

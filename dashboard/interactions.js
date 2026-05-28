@@ -317,7 +317,7 @@
         '<label class="dept-mode-option"><input type="radio" name="dept-scope-mode" value="include" />Include only selected</label>' +
         "</div>" +
         '<details class="dept-filter">' +
-        '<summary><span class="dept-filter-title">Departments</span> <span class="dept-filter-count" aria-live="polite">All in scope</span></summary>' +
+        '<summary class="dept-mode-option dept-filter-summary"><span class="dept-filter-title">Departments</span> <span class="dept-filter-count" aria-live="polite">All in scope</span></summary>' +
         '<div class="dept-filter-menu"></div>' +
         "</details>" +
         '<button type="button" class="dept-filter-clear">Reset</button>';
