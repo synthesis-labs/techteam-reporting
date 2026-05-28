@@ -169,6 +169,9 @@
       }
 
       const rows = currentScopeRows();
+      if (!rows.length) {
+        return;
+      }
       const total = rows.reduce((acc, r) => acc + r.headcount, 0);
       const withLicense = rows.reduce((acc, r) => acc + r.withLicense, 0);
       const noTools = Math.max(total - withLicense, 0);
@@ -188,6 +191,9 @@
       }
 
       const rows = currentScopeRows();
+      if (!rows.length) {
+        return;
+      }
       const total = rows.reduce((acc, r) => acc + r.headcount, 0);
       const withLicense = rows.reduce((acc, r) => acc + r.withLicense, 0);
       const noTools = Math.max(total - withLicense, 0);
