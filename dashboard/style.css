@@ -74,8 +74,11 @@ main.content {
 .dashboard-filters {
   display: flex;
   align-items: center;
+  justify-content: flex-start;
   gap: 0.7rem;
   flex-wrap: wrap;
+  width: 100%;
+  box-sizing: border-box;
   margin: 0.55rem 0 1.2rem;
   padding: 0.65rem 0.75rem;
   border: 1px solid #e2e8f0;
@@ -104,6 +107,7 @@ main.content {
   gap: 0.35rem;
   border: 1px solid #cbd5e1;
   border-radius: 999px;
+  min-height: 32px;
   padding: 0.22rem 0.55rem;
   background: #ffffff;
   color: #334155;
@@ -124,6 +128,8 @@ main.content {
 
 .dept-filter {
   position: relative;
+  display: inline-flex;
+  align-items: center;
 }
 
 .dept-filter > summary {
@@ -131,9 +137,11 @@ main.content {
   display: inline-flex;
   align-items: center;
   gap: 0.45rem;
-  padding: 0.35rem 0.55rem;
+  min-height: 32px;
+  box-sizing: border-box;
+  padding: 0.22rem 0.62rem;
   border: 1px solid #cbd5e1;
-  border-radius: 4px;
+  border-radius: 999px;
   background: #ffffff;
   color: #1f2937;
   cursor: pointer;
@@ -145,13 +153,15 @@ main.content {
 }
 
 .dept-filter-title {
-  font-size: 0.76rem;
+  font-size: 0.73rem;
   font-weight: 600;
+  line-height: 1;
 }
 
 .dept-filter-count {
-  font-size: 0.7rem;
+  font-size: 0.73rem;
   color: #64748b;
+  line-height: 1;
 }
 
 .dept-filter-menu {
@@ -192,6 +202,7 @@ main.content {
 .dept-filter-clear {
   border: 1px solid #cbd5e1;
   border-radius: 4px;
+  min-height: 32px;
   background: #ffffff;
   color: #334155;
   font-size: 0.75rem;
@@ -860,6 +871,12 @@ p.footer {
 
   .dashboard-filters {
     align-items: flex-start;
+  }
+
+  .dept-filter,
+  .dept-filter > summary,
+  .dept-filter-clear {
+    width: 100%;
   }
 
   .dept-filter-mode {
