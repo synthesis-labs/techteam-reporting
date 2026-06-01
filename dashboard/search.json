@@ -213,7 +213,7 @@
     "href": "index.html",
     "title": "AI Adoption and Maturity Trends",
     "section": "",
-    "text": "Synthesis Software Technologies · Technology Office · Long-term view · latest: 2026-05-01 · latest snapshot →",
+    "text": "Synthesis Software Technologies · Technology Office · Long-term view · latest: 2026-06-01 · latest snapshot →",
     "crumbs": [
       "Trends"
     ]
@@ -243,7 +243,7 @@
     "href": "index.html#adoption-by-department",
     "title": "AI Adoption and Maturity Trends",
     "section": "Adoption by department",
-    "text": "Adoption by department\n\nHeatmap of department adoption % across snapshots. Departments are sorted by latest headcount; cells are blank when a department wasn’t present that month.\n\n                                                \n\nLatest snapshot (2026-05) — license coverage by department\n\n\n\n\nDepartment\n\n\nHeadcount\n\n\nWith license\n\n\nAdoption %\n\n\n\n\n\n\nCode\n\n\n48\n\n\n37\n\n\n77.1%\n\n\n\n\nCloud\n\n\n30\n\n\n16\n\n\n53.3%\n\n\n\n\nRegtech\n\n\n24\n\n\n19\n\n\n79.2%\n\n\n\n\nManaged Operations\n\n\n23\n\n\n12\n\n\n52.2%\n\n\n\n\nHalo\n\n\n20\n\n\n12\n\n\n60.0%\n\n\n\n\nIntelligent Data\n\n\n17\n\n\n15\n\n\n88.2%\n\n\n\n\nSales\n\n\n11\n\n\n11\n\n\n100.0%\n\n\n\n\nBusiness Enablement & Operations\n\n\n8\n\n\n7\n\n\n87.5%\n\n\n\n\nPMO\n\n\n8\n\n\n5\n\n\n62.5%\n\n\n\n\nPayment Centre of Excellence\n\n\n8\n\n\n3\n\n\n37.5%\n\n\n\n\nFinance\n\n\n5\n\n\n5\n\n\n100.0%\n\n\n\n\nProfessional Services\n\n\n5\n\n\n3\n\n\n60.0%\n\n\n\n\nTechnology\n\n\n4\n\n\n3\n\n\n75.0%\n\n\n\n\nCryptography\n\n\n3\n\n\n1\n\n\n33.3%\n\n\n\n\nProfessional services\n\n\n3\n\n\n2\n\n\n66.7%\n\n\n\n\nAraxi\n\n\n3\n\n\n2\n\n\n66.7%\n\n\n\n\nProduct Incubation\n\n\n2\n\n\n2\n\n\n100.0%\n\n\n\n\nHuman Resources\n\n\n2\n\n\n1\n\n\n50.0%\n\n\n\n\nMarketing\n\n\n1\n\n\n0\n\n\n0.0%\n\n\n\n\nProduct Development Services\n\n\n1\n\n\n1\n\n\n100.0%\n\n\n\n\nExecutive\n\n\n1\n\n\n1\n\n\n100.0%",
+    "text": "Adoption by department\n\nHeatmap of department adoption % across snapshots. Departments are sorted by latest headcount; cells are blank when a department wasn’t present that month.\n\n                                                \n\nLatest snapshot (2026-06) — license coverage by department\n\n\n\n\nDepartment\n\n\nHeadcount\n\n\nWith license\n\n\nAdoption %\n\n\n\n\n\n\nCode\n\n\n48\n\n\n31\n\n\n64.6%\n\n\n\n\nCloud\n\n\n30\n\n\n12\n\n\n40.0%\n\n\n\n\nRegtech\n\n\n24\n\n\n11\n\n\n45.8%\n\n\n\n\nManaged Operations\n\n\n23\n\n\n7\n\n\n30.4%\n\n\n\n\nHalo\n\n\n20\n\n\n7\n\n\n35.0%\n\n\n\n\nIntelligent Data\n\n\n17\n\n\n11\n\n\n64.7%\n\n\n\n\nSales\n\n\n12\n\n\n7\n\n\n58.3%\n\n\n\n\nBusiness Enablement & Operations\n\n\n8\n\n\n5\n\n\n62.5%\n\n\n\n\nPayment Centre of Excellence\n\n\n8\n\n\n5\n\n\n62.5%\n\n\n\n\nPMO\n\n\n8\n\n\n5\n\n\n62.5%\n\n\n\n\nProfessional Services\n\n\n5\n\n\n4\n\n\n80.0%\n\n\n\n\nFinance\n\n\n5\n\n\n2\n\n\n40.0%\n\n\n\n\nTechnology\n\n\n4\n\n\n3\n\n\n75.0%\n\n\n\n\nAraxi\n\n\n3\n\n\n1\n\n\n33.3%\n\n\n\n\nCryptography\n\n\n3\n\n\n0\n\n\n0.0%\n\n\n\n\nProfessional services\n\n\n3\n\n\n2\n\n\n66.7%\n\n\n\n\nHuman Resources\n\n\n2\n\n\n0\n\n\n0.0%\n\n\n\n\nProduct Incubation\n\n\n2\n\n\n0\n\n\n0.0%\n\n\n\n\nExecutive\n\n\n2\n\n\n2\n\n\n100.0%\n\n\n\n\nMarketing\n\n\n1\n\n\n0\n\n\n0.0%\n\n\n\n\nProduct Development Services\n\n\n1\n\n\n1\n\n\n100.0%\n\n\n\n\nRegTech\n\n\n1\n\n\n0\n\n\n0.0%",
     "crumbs": [
       "Trends"
     ]
@@ -293,9 +293,108 @@
     "href": "index.html#self-assessed-maturity",
     "title": "AI Adoption and Maturity Trends",
     "section": "Self-assessed maturity",
-    "text": "Self-assessed maturity\n\nNo assessment responses loaded yet. Drop assessments.xlsx into the private repo’s &lt;YYYY-MM&gt;/raw/ and re-run the loader.\n\n\nGenerated from data/history/. Covers 3 snapshots (2026-03 → 2026-05). Re-run python data/aggregate.py after refreshing any snapshot.",
+    "text": "Self-assessed maturity\n\nNo assessment responses loaded yet. Drop assessments.xlsx into the private repo’s &lt;YYYY-MM&gt;/raw/ and re-run the loader.\n\n\nGenerated from data/history/. Covers 4 snapshots (2026-03 → 2026-06). Re-run python data/aggregate.py after refreshing any snapshot.",
     "crumbs": [
       "Trends"
+    ]
+  },
+  {
+    "objectID": "snapshot-2026-06.html",
+    "href": "snapshot-2026-06.html",
+    "title": "Snapshot — 2026-06",
+    "section": "",
+    "text": "Synthesis Software Technologies · Technology Office · Snapshot 2026-06-01 · long-term trends →",
+    "crumbs": [
+      "Snapshots",
+      "2026-06"
+    ]
+  },
+  {
+    "objectID": "snapshot-2026-06.html#key-insights",
+    "href": "snapshot-2026-06.html#key-insights",
+    "title": "Snapshot — 2026-06",
+    "section": "Key insights",
+    "text": "Key insights\n\nHeadline takeaways auto-derived from this snapshot — counts of high-/low-adoption BUs, dominant tools, and activation gaps. The aim is to surface what ExCo would otherwise pull out of the report by hand.\n\n\n\n🟢\n\n\n2 BUs at 100% adoption\n\n\nExecutive, Product Development Services fully equipped.\n\n\n\n\n🟡\n\n\n8 BUs at 50–79% adoption\n\n\nCapacity to close quickly with targeted activation.\n\n\n\n\n🔴\n\n\n11 BUs need activation\n\n\n5 BUs at 0%: Cryptography, Human Resources, Product Incubation…; 6 below 50%.\n\n\n\n\n🤖\n\n\nClaude is most-used (43%)\n\n\n99 of 230 employees licensed. Niche tools (&lt;15%): Cursor, Gemini, Microsoft Copilot.\n\n\n\n\n📊\n\n\n50.4% overall — below PS industry median (~55–60%)\n\n\nLicensed = at least one AI tool seat resolved to the employee.\n\n\n\n\n🎯\n\n\n114 employees (50%) have zero tools\n\n\nPriority activation cohort for next month.",
+    "crumbs": [
+      "Snapshots",
+      "2026-06"
+    ]
+  },
+  {
+    "objectID": "snapshot-2026-06.html#license-allocation-by-tool",
+    "href": "snapshot-2026-06.html#license-allocation-by-tool",
+    "title": "Snapshot — 2026-06",
+    "section": "License allocation by tool",
+    "text": "License allocation by tool\n\n\n\n\nTool\n\n\nLicensed\n\n\n% workforce\n\n\nPrior month\n\n\nΔ\n\n\n\n\n\n\nChatGPT\n\n\n0\n\n\n0.0%\n\n\n90\n\n\n▼ 90\n\n\n\n\nClaude\n\n\n99\n\n\n43.0%\n\n\n93\n\n\n▲ 6\n\n\n\n\nCursor\n\n\n20\n\n\n8.7%\n\n\n20\n\n\n±0\n\n\n\n\nGemini\n\n\n20\n\n\n8.7%\n\n\n18\n\n\n▲ 2\n\n\n\n\nGitHub Copilot\n\n\n0\n\n\n0.0%\n\n\n26\n\n\n▼ 26\n\n\n\n\nGitHub Copilot (new export)\n\n\n0\n\n\n0.0%\n\n\n0\n\n\n±0\n\n\n\n\nMicrosoft Copilot\n\n\n15\n\n\n6.5%\n\n\n15\n\n\n±0\n\n\n\n\n\nCounts reflect resolved licenses only — 5 unmatched rows are excluded (see Data quality below). Δ compares to the prior snapshot loaded into data/history/.",
+    "crumbs": [
+      "Snapshots",
+      "2026-06"
+    ]
+  },
+  {
+    "objectID": "snapshot-2026-06.html#adoption-by-department",
+    "href": "snapshot-2026-06.html#adoption-by-department",
+    "title": "Snapshot — 2026-06",
+    "section": "Adoption by department",
+    "text": "Adoption by department\n\n\n\n\nDepartment\n\n\nHeadcount\n\n\nWith license\n\n\nAdoption\n\n\n\n\n\n\nCode\n\n\n48\n\n\n31\n\n\n65%\n\n\n\n\nCloud\n\n\n30\n\n\n12\n\n\n40%\n\n\n\n\nRegtech\n\n\n24\n\n\n11\n\n\n46%\n\n\n\n\nManaged Operations\n\n\n23\n\n\n7\n\n\n30%\n\n\n\n\nHalo\n\n\n20\n\n\n7\n\n\n35%\n\n\n\n\nIntelligent Data\n\n\n17\n\n\n11\n\n\n65%\n\n\n\n\nSales\n\n\n12\n\n\n7\n\n\n58%\n\n\n\n\nBusiness Enablement & Operations\n\n\n8\n\n\n5\n\n\n62%\n\n\n\n\nPayment Centre of Excellence\n\n\n8\n\n\n5\n\n\n62%\n\n\n\n\nPMO\n\n\n8\n\n\n5\n\n\n62%\n\n\n\n\nProfessional Services\n\n\n5\n\n\n4\n\n\n80%\n\n\n\n\nFinance\n\n\n5\n\n\n2\n\n\n40%\n\n\n\n\nTechnology\n\n\n4\n\n\n3\n\n\n75%\n\n\n\n\nAraxi\n\n\n3\n\n\n1\n\n\n33%\n\n\n\n\nCryptography\n\n\n3\n\n\n0\n\n\n0%\n\n\n\n\nProfessional services\n\n\n3\n\n\n2\n\n\n67%\n\n\n\n\nHuman Resources\n\n\n2\n\n\n0\n\n\n0%\n\n\n\n\nProduct Incubation\n\n\n2\n\n\n0\n\n\n0%\n\n\n\n\nExecutive\n\n\n2\n\n\n2\n\n\n100%\n\n\n\n\nMarketing\n\n\n1\n\n\n0\n\n\n0%\n\n\n\n\nProduct Development Services\n\n\n1\n\n\n1\n\n\n100%\n\n\n\n\nRegTech\n\n\n1\n\n\n0\n\n\n0%",
+    "crumbs": [
+      "Snapshots",
+      "2026-06"
+    ]
+  },
+  {
+    "objectID": "snapshot-2026-06.html#project-ai-maturity-by-tier",
+    "href": "snapshot-2026-06.html#project-ai-maturity-by-tier",
+    "title": "Snapshot — 2026-06",
+    "section": "Project AI maturity by tier",
+    "text": "Project AI maturity by tier\n\nEach project is assigned to one tier — the highest it qualifies for based on its AI Usage tags. L3 is CI/CD-embedded or full feature in AI; L2 is AI for development; L1 is research-only; L0 is no AI; TBD are projects pending classification.\n\n\n\nL3 — CI/CD & Full AI\n\n\n\n\n\n0 (0%)\n\n\nL2 — AI for Development\n\n\n\n\n\n0 (0%)\n\n\nL1 — Research\n\n\n\n\n\n0 (0%)\n\n\nL0 — No AI\n\n\n\n\n\n0 (0%)\n\n\nTBD\n\n\n\n\n\n0 (0%)",
+    "crumbs": [
+      "Snapshots",
+      "2026-06"
+    ]
+  },
+  {
+    "objectID": "snapshot-2026-06.html#ai-using-projects-by-bu",
+    "href": "snapshot-2026-06.html#ai-using-projects-by-bu",
+    "title": "Snapshot — 2026-06",
+    "section": "AI-using projects by BU",
+    "text": "AI-using projects by BU\n\n\n\n\nBusiness Unit\n\n\nProjects\n\n\nUsing AI\n\n\n%",
+    "crumbs": [
+      "Snapshots",
+      "2026-06"
+    ]
+  },
+  {
+    "objectID": "snapshot-2026-06.html#self-assessed-ai-maturity",
+    "href": "snapshot-2026-06.html#self-assessed-ai-maturity",
+    "title": "Snapshot — 2026-06",
+    "section": "Self-assessed AI maturity",
+    "text": "Self-assessed AI maturity\n\nNo AI Maturity Self-Assessment responses loaded for this snapshot yet. Drop assessments.xlsx into the private repo’s &lt;YYYY-MM&gt;/raw/ and re-run the loader to populate this section.",
+    "crumbs": [
+      "Snapshots",
+      "2026-06"
+    ]
+  },
+  {
+    "objectID": "snapshot-2026-06.html#strategic-themes-next-month",
+    "href": "snapshot-2026-06.html#strategic-themes-next-month",
+    "title": "Snapshot — 2026-06",
+    "section": "Strategic themes — next month",
+    "text": "Strategic themes — next month\n\nThree concrete cohorts to action next month, derived from the data above. Numbers in bold are pulled from this snapshot; framings (PRIORITY / SCALE / AMPLIFY) mirror the ExCo report’s §4.\n\n\n\n\n🔴PRIORITY\n\n\nTool provisioning gap\n\n\n\n114 total employees have zero AI tools.\n\n\n5 unresolved license rows blocking accurate counts.\n\n\n\nRecommended actions\n\n\n\nProvision Claude / ChatGPT licences for AI-active project teams this week.\n\n\nResolve outstanding unmatched handles via aliases.csv.\n\n\nEstablish a licence-request SLA (target: 48 hrs).\n\n\n\n\n\n🟡SCALE\n\n\nMove the L2 middle\n\n\n\nLoad AI Maturity Self-Assessment responses to size this cohort.\n\n\n\nRecommended actions\n\n\n\nLaunch an L2→L3 upskilling cohort using internal AI methodology.\n\n\nFocus on the largest BUs first — biggest leverage per session.\n\n\nPair each cohort member with a daily AI workflow exercise.\n\n\n\n\n\n🟢AMPLIFY\n\n\nL3 / L4 AI champions\n\n\n\nLoad AI Maturity Self-Assessment responses to identify champions.\n\n\n\nRecommended actions\n\n\n\nFormalise an internal AI champions programme.\n\n\nPair champions with lagging BUs as embedded mentors.\n\n\nCapture champion playbooks for reuse across the org.",
+    "crumbs": [
+      "Snapshots",
+      "2026-06"
+    ]
+  },
+  {
+    "objectID": "snapshot-2026-06.html#data-quality",
+    "href": "snapshot-2026-06.html#data-quality",
+    "title": "Snapshot — 2026-06",
+    "section": "Data quality",
+    "text": "Data quality\n\n\n\n5\n\n\nUnmatched license rows\n\n\nTool emails not found in master — needs alias resolution\n\n\n\n\n3\n\n\nTools awaiting export\n\n\nChatGPT, GitHub Copilot, GitHub Copilot (new export) — not yet loaded for this snapshot\n\n\n\n\n0\n\n\nAssessment responses\n\n\nAI Maturity Self Assessment — not yet loaded\n\n\n\n\nGenerated from data/2026-06/standardised/. Re-run python dashboard/build.py –month 2026-06 after refreshing data.",
+    "crumbs": [
+      "Snapshots",
+      "2026-06"
     ]
   },
   {
